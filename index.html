@@ -1,0 +1,1984 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CinéHome</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#0f0f0f;--bg2:#141414;--bg3:#1c1c1c;--bg4:#252525;--red:#e50914;--gold:#ff8a00;--green:#3b82f6;--text:#fff;--text2:#b3b3b3;--text3:#555}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:'Helvetica Neue',Arial,sans-serif;overflow-x:hidden;min-height:100vh}
+.hidden{display:none!important}
+
+/* ── PROFILES ── */
+#screen-profiles{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2rem;
+  background:linear-gradient(rgba(0,0,0,.75),rgba(0,0,0,.75)),url('https://assets.nflxext.com/ffe/siteui/vlv3/b2a21b3b-2db3-4ce1-9891-bf07a4a2e46d/30873ece-8b5c-4e0b-a27a-cbc00c3c7a18/FR-fr-20231120-popsignuptwoweeks-perspective_alpha_website_large.jpg')center/cover fixed}
+.p-logo{color:var(--red);font-size:3rem;font-weight:900;letter-spacing:-2px;margin-bottom:3rem}
+.p-title{font-size:2rem;font-weight:400;margin-bottom:2.5rem}
+.p-grid{display:flex;flex-wrap:wrap;gap:2rem;justify-content:center;max-width:680px;margin-bottom:2.5rem}
+.p-item{display:flex;flex-direction:column;align-items:center;gap:.6rem;cursor:pointer}
+.p-avatar{width:110px;height:110px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:3rem;font-weight:700;border:3px solid transparent;transition:all .2s}
+.p-item:hover .p-avatar{border-color:#fff;transform:scale(1.05)}
+.p-name{font-size:.9rem;color:var(--text2);transition:color .2s}
+.p-item:hover .p-name{color:#fff}
+.p-add .p-avatar{background:var(--bg4);border:3px solid var(--text3);font-size:2rem;color:var(--text3)}
+.p-add:hover .p-avatar{border-color:#fff;color:#fff}
+.p-manage{background:transparent;border:1px solid var(--text2);color:var(--text2);padding:10px 28px;font-size:.85rem;cursor:pointer;letter-spacing:.1em;text-transform:uppercase;transition:all .2s}
+.p-manage:hover{background:var(--text2);color:#000}
+
+/* ── NAV ── */
+nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;padding:.9rem 2.5rem;gap:1.5rem;background:linear-gradient(to bottom,rgba(0,0,0,.85),transparent);transition:background .3s}
+nav.solid{background:var(--bg)}
+.n-logo{color:var(--red);font-size:1.8rem;font-weight:900;letter-spacing:-1px;cursor:pointer;flex-shrink:0}
+.n-links{display:flex;gap:1.2rem;list-style:none}
+.n-links a{font-size:.85rem;color:var(--text2);cursor:pointer;transition:color .2s}
+.n-links a:hover,.n-links a.active{color:#fff}
+.n-right{margin-left:auto;display:flex;align-items:center;gap:1rem}
+.n-search-btn{background:none;border:none;color:#fff;font-size:1.1rem;cursor:pointer;padding:4px;transition:opacity .2s}
+.n-search-btn:hover{opacity:.7}
+.n-profile-wrap{display:flex;align-items:center;gap:.5rem;cursor:pointer}
+.n-pav{width:32px;height:32px;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:.85rem;font-weight:700}
+.n-pname{font-size:.8rem;color:var(--text2)}
+
+/* ── SEARCH OVERLAY ── */
+#search-overlay{position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.96);display:flex;flex-direction:column;padding:5rem 2.5rem 2rem;overflow-y:auto}
+.s-header{display:flex;align-items:center;gap:1rem;margin-bottom:1.5rem}
+.s-input-wrap{flex:1}
+.s-input-wrap input{width:100%;background:transparent;border:none;border-bottom:2px solid var(--text2);color:#fff;font-size:2rem;padding:.5rem 0;outline:none}
+.s-input-wrap input::placeholder{color:var(--text3)}
+.s-close{background:none;border:none;color:var(--text2);font-size:1.5rem;cursor:pointer}
+.s-section-title{font-size:.8rem;font-weight:600;text-transform:uppercase;letter-spacing:.12em;color:var(--text2);margin:1.5rem 0 .75rem}
+.s-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px}
+.s-row{position:relative;margin-bottom:1.4rem}
+.s-row-scroll{display:flex;gap:10px;overflow-x:auto;scroll-behavior:smooth;scrollbar-width:none;padding:.25rem 52px .75rem 0;max-height:310px}
+.s-row-scroll::-webkit-scrollbar{display:none}
+.s-row-scroll .card{width:150px}
+.s-row-scroll .card-img,.s-row-scroll .card-ph{width:150px;height:225px}
+.s-arrow{position:absolute;top:50%;transform:translateY(-50%);z-index:30;width:38px;height:38px;border:none;border-radius:50%;cursor:pointer;background:rgba(0,0,0,.75);color:#fff;font-size:20px}
+.s-arrow.left{left:0}
+.s-arrow.right{right:6px}
+
+.s-no-result{color:var(--text2);font-size:1rem;margin-top:2rem}
+.s-manual-btn{margin-top:1.5rem;background:transparent;border:1px solid var(--text2);color:var(--text2);padding:10px 24px;border-radius:4px;cursor:pointer;font-size:.9rem;transition:all .2s}
+.s-manual-btn:hover{background:var(--text2);color:#000}
+
+/* ── HERO ── */
+#hero{position:relative;height:88vh;min-height:500px;overflow:hidden}
+#hero-bg{position:absolute;inset:0;background-size:cover;background-position:center 15%;transition:opacity .8s}
+#hero-bg::after{content:'';position:absolute;inset:0;background:linear-gradient(to right,rgba(0,0,0,.85) 35%,transparent 75%),linear-gradient(to top,rgba(0,0,0,1) 0%,transparent 55%)}
+#hero-content{position:absolute;bottom:18%;left:4%;max-width:42%}
+.h-type{font-size:.7rem;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--text2);margin-bottom:.4rem}
+.h-title{font-size:3.2rem;font-weight:700;line-height:1.05;margin-bottom:.75rem;text-shadow:2px 2px 12px rgba(0,0,0,.9)}
+.h-meta{display:flex;align-items:center;gap:.75rem;margin-bottom:1rem;flex-wrap:wrap}
+.h-imdb{background:var(--gold);color:#000;font-size:.72rem;font-weight:700;padding:2px 7px;border-radius:3px}
+.h-tag{font-size:.85rem;color:var(--text2)}
+.h-desc{font-size:.9rem;color:var(--text2);line-height:1.55;margin-bottom:1.5rem;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.h-btns{display:flex;gap:.75rem}
+.h-btn{display:flex;align-items:center;gap:.5rem;padding:.7rem 1.8rem;border-radius:4px;font-size:.95rem;font-weight:600;cursor:pointer;border:none;transition:all .15s}
+.h-btn-white{background:#fff;color:#000}.h-btn-white:hover{background:rgba(255,255,255,.75)}
+.h-btn-gray{background:rgba(109,109,110,.65);color:#fff}.h-btn-gray:hover{background:rgba(109,109,110,.45)}
+
+/* ── CATALOG ── */
+#catalog{position:relative;z-index:1;margin-top:-100px;padding-bottom:4rem}
+.row{padding:.75rem 0 1rem}
+.row-title{font-size:1.1rem;font-weight:600;padding:0 4%;margin-bottom:.75rem;color:#e5e5e5}
+.row-scroller{display:flex;gap:8px;padding:0 4% .5rem;overflow-x:auto;scroll-behavior:smooth;scrollbar-width:none}
+.row-scroller::-webkit-scrollbar{display:none}
+.row-wrap{position:relative}
+.row-nav{position:absolute;top:50%;transform:translateY(-50%);z-index:20;width:42px;height:42px;border:none;border-radius:50%;cursor:pointer;background:rgba(0,0,0,.75);color:#fff;font-size:22px}
+.row-prev{left:8px}
+.row-next{right:8px}
+
+
+/* ── CARD ── */
+.card{flex-shrink:0;width:180px;position:relative;border-radius:4px;overflow:hidden;cursor:pointer;transition:transform .25s,z-index 0s .25s;scroll-snap-align:start}
+.card:hover{transform:scale(1.09);z-index:10;transition:transform .25s,z-index 0s}
+.card-img{width:180px;height:270px;object-fit:cover;display:block}
+.card-ph{width:180px;height:270px;display:flex;align-items:flex-end;padding:12px;background:linear-gradient(160deg,#1a1a2e,#0f0f20)}
+.card-ph-t{font-size:12px;font-weight:600;line-height:1.3;color:#fff}
+.card-ov{position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,.97) 0%,rgba(0,0,0,.3) 60%,transparent 100%);opacity:0;transition:opacity .25s;display:flex;flex-direction:column;justify-content:flex-end;padding:10px}
+.card:hover .card-ov{opacity:1}
+.card-ov-title{font-size:12px;font-weight:600;margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.card-ov-meta{display:flex;gap:4px;align-items:center;margin-bottom:5px;flex-wrap:wrap}
+.card-imdb{background:var(--gold);color:#000;font-size:9px;font-weight:700;padding:1px 5px;border-radius:2px}
+.card-tag{font-size:9px;color:var(--text2)}
+.card-myrating{display:flex;gap:1px;margin-bottom:5px}
+.card-mystar{font-size:9px;color:var(--gold)}
+.card-btns{display:flex;gap:5px}
+.c-btn{width:28px;height:28px;border-radius:50%;border:2px solid;display:flex;align-items:center;justify-content:center;font-size:11px;cursor:pointer;transition:all .15s;background:transparent}
+.c-btn-seen{border-color:var(--green);color:var(--green)}.c-btn-seen.done{background:var(--green);color:#000}
+.c-btn-info{border-color:rgba(255,255,255,.5);color:#fff}.c-btn-info:hover{border-color:#fff}
+.card-seen-dot{position:absolute;top:7px;right:7px;width:20px;height:20px;border-radius:50%;background:var(--green);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#000}
+.row-empty{padding:.5rem 4%;font-size:.85rem;color:var(--text3);font-style:italic}
+
+/* ── MODAL ── */
+#modal-ov{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:300;display:flex;align-items:flex-start;justify-content:center;overflow-y:auto;padding:4rem 1rem 2rem}
+#modal{background:#181818;border-radius:8px;width:100%;max-width:860px;overflow:hidden;position:relative}
+.m-back{height:420px;background-size:cover;background-position:center;position:relative}
+.m-back::after{content:'';position:absolute;inset:0;background:linear-gradient(to top,#181818 0%,transparent 60%)}
+.m-close{position:absolute;top:1rem;right:1rem;width:36px;height:36px;background:rgba(24,24,24,.9);border:none;border-radius:50%;color:#fff;font-size:1rem;cursor:pointer;z-index:5;display:flex;align-items:center;justify-content:center}
+.m-body{padding:0 2.5rem 2.5rem;margin-top:-90px;position:relative}
+.m-top{display:flex;gap:1.5rem;margin-bottom:1.5rem;align-items:flex-end}
+.m-poster{width:130px;height:195px;border-radius:4px;object-fit:cover;flex-shrink:0;box-shadow:0 4px 24px rgba(0,0,0,.6)}
+.m-poster-ph{width:130px;height:195px;border-radius:4px;background:var(--bg3);flex-shrink:0}
+.m-info{flex:1;padding-top:.5rem}
+.m-title{font-size:2rem;font-weight:700;margin-bottom:.6rem;line-height:1.1}
+.m-meta{display:flex;flex-wrap:wrap;gap:.5rem;align-items:center;margin-bottom:.7rem}
+.m-imdb{background:var(--gold);color:#000;font-size:.72rem;font-weight:700;padding:3px 8px;border-radius:3px}
+.m-tag{background:rgba(255,255,255,.1);color:var(--text2);font-size:.72rem;padding:3px 8px;border-radius:3px}
+.m-plts{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:.5rem}
+.m-plt{font-size:.68rem;padding:3px 8px;border-radius:20px;font-weight:500}
+.m-overview{font-size:.9rem;color:var(--text2);line-height:1.65;margin-bottom:1.5rem}
+.m-sl{font-size:.78rem;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:var(--text2);margin-bottom:.6rem}
+.m-stars{display:flex;gap:5px;margin-bottom:1.25rem}
+.m-star{font-size:1.9rem;cursor:pointer;color:var(--text3);transition:color .1s,transform .1s;line-height:1}
+.m-star.lit{color:var(--gold)}
+.m-star:hover{transform:scale(1.15)}
+.m-note{width:100%;background:var(--bg3);border:1px solid rgba(255,255,255,.12);border-radius:4px;color:#fff;font-size:.9rem;padding:10px 12px;line-height:1.6;resize:vertical;min-height:90px;outline:none;font-family:inherit}
+.m-note:focus{border-color:rgba(255,255,255,.35)}
+.m-btns{display:flex;gap:.75rem;margin-top:1.2rem;flex-wrap:wrap}
+.m-btn{padding:.65rem 1.4rem;border-radius:4px;font-size:.88rem;font-weight:600;cursor:pointer;border:none;display:flex;align-items:center;gap:.5rem;transition:all .15s}
+.m-btn-seen{background:var(--green);color:#000}.m-btn-seen.done{background:#2a6b3a;color:#fff}.m-btn-seen:hover{opacity:.85}
+.m-btn-save{background:rgba(255,255,255,.12);color:#fff}.m-btn-save:hover{background:rgba(255,255,255,.22)}
+.m-btn-del{background:transparent;border:1px solid rgba(255,255,255,.2);color:var(--text2)}.m-btn-del:hover{border-color:#fff;color:#fff}
+.status-tabs{display:flex;gap:8px;flex-wrap:wrap;margin:1rem 0 1.2rem}
+.status-btn{padding:.55rem 1rem;border-radius:999px;border:1px solid rgba(255,255,255,.25);background:transparent;color:var(--text2);cursor:pointer;font-size:.82rem;font-weight:600}
+.status-btn.active{background:var(--green);color:#000;border-color:var(--green)}
+.season-list{display:flex;gap:7px;flex-wrap:wrap;margin:.6rem 0 1.2rem}
+.season-pill{border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.08);color:#fff;border-radius:999px;padding:6px 10px;font-size:.78rem;cursor:pointer}
+.season-pill.done{background:var(--green);color:#000;border-color:var(--green)}
+.card-season{position:absolute;left:7px;top:7px;background:rgba(0,0,0,.75);border-radius:999px;padding:3px 7px;font-size:10px;color:#fff;z-index:5}
+
+
+/* ── ADD MANUAL MODAL ── */
+#add-ov{position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:400;display:flex;align-items:center;justify-content:center;padding:1rem}
+#add-modal{background:#1e1e1e;border-radius:8px;width:100%;max-width:480px;padding:2rem;max-height:90vh;overflow-y:auto}
+#add-modal h2{font-size:1.3rem;margin-bottom:1.5rem}
+.fg{margin-bottom:1rem}
+.fg label{display:block;font-size:.75rem;color:var(--text2);text-transform:uppercase;letter-spacing:.08em;margin-bottom:.35rem}
+.fg input,.fg select,.fg textarea{width:100%;background:var(--bg4);border:1px solid rgba(255,255,255,.12);border-radius:4px;color:#fff;font-size:.88rem;padding:9px 12px;outline:none;font-family:inherit}
+.fg input:focus,.fg select:focus,.fg textarea:focus{border-color:rgba(255,255,255,.35)}
+.fg textarea{resize:vertical;min-height:70px}
+.frow{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.fa{display:flex;gap:8px;justify-content:flex-end;margin-top:1.5rem}
+.fa-btn{padding:.65rem 1.4rem;border-radius:4px;font-size:.88rem;font-weight:600;cursor:pointer;border:none}
+.fa-cancel{background:transparent;border:1px solid rgba(255,255,255,.25);color:var(--text2)}
+.fa-save{background:var(--red);color:#fff}
+
+/* ── MANAGE PROFILES MODAL ── */
+#mgr-ov{position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:500;display:flex;align-items:center;justify-content:center;padding:1rem}
+#mgr-modal{background:#1e1e1e;border-radius:8px;width:100%;max-width:460px;padding:2rem;max-height:90vh;overflow-y:auto}
+#mgr-modal h2{font-size:1.3rem;margin-bottom:1.2rem}
+.mgr-item{display:flex;align-items:center;gap:.9rem;padding:.65rem 0;border-bottom:1px solid rgba(255,255,255,.06)}
+.mgr-av{width:38px;height:38px;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:1rem;font-weight:700;flex-shrink:0}
+.mgr-name{flex:1;font-size:.9rem}
+.mgr-del{background:none;border:none;color:var(--text3);font-size:.9rem;cursor:pointer;padding:4px}.mgr-del:hover{color:var(--red)}
+
+/* ── PLATFORM COLORS ── */
+.plt-netflix{background:#1a0000;color:#ff5555}
+.plt-prime{background:#00101f;color:#00a8e0}
+.plt-apple{background:#111;color:#ccc}
+.plt-hbo{background:#100020;color:#b380ff}
+.plt-disney{background:#000a1f;color:#5599ff}
+.plt-paramount{background:#000816;color:#4da6ff}
+.plt-canal{background:#001000;color:#33cc66}
+.plt-multi{background:#1e1e1e;color:#aaa}
+
+/* ── TOAST ── */
+#toast{position:fixed;bottom:2rem;right:2rem;background:#222;border:1px solid rgba(255,255,255,.12);border-radius:6px;padding:11px 16px;font-size:.88rem;opacity:0;transform:translateY(8px);transition:all .25s;pointer-events:none;z-index:999;max-width:280px}
+#toast.show{opacity:1;transform:translateY(0)}
+#toast.ok{border-color:var(--green);color:var(--green)}
+#toast.err{border-color:var(--red);color:var(--red)}
+#toast.info{border-color:#4a9eff;color:#4a9eff}
+
+
+/* ── AUTH LOGIN ── */
+#auth-screen{position:fixed;inset:0;z-index:1000;background:linear-gradient(135deg,#05070a,#101826);display:flex;align-items:center;justify-content:center;padding:1.2rem}
+.auth-card{width:100%;max-width:420px;background:#181818;border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:2rem;box-shadow:0 18px 60px rgba(0,0,0,.45)}
+.auth-logo{color:var(--red);font-size:2rem;font-weight:900;letter-spacing:-1px;margin-bottom:.4rem}
+.auth-title{font-size:1.35rem;font-weight:700;margin-bottom:.4rem}
+.auth-sub{color:var(--text2);font-size:.9rem;line-height:1.45;margin-bottom:1.4rem}
+.auth-fg{margin-bottom:1rem}
+.auth-fg label{display:block;font-size:.72rem;color:var(--text2);text-transform:uppercase;letter-spacing:.08em;margin-bottom:.35rem}
+.auth-fg input{width:100%;background:var(--bg4);border:1px solid rgba(255,255,255,.14);border-radius:5px;color:#fff;font-size:.95rem;padding:11px 12px;outline:none}
+.auth-fg input:focus{border-color:var(--green)}
+.auth-btn{width:100%;background:var(--green);border:none;color:#000;border-radius:5px;font-size:.95rem;font-weight:800;padding:12px;cursor:pointer;margin-top:.2rem}
+.auth-btn:hover{opacity:.9}
+.auth-error{display:none;margin-top:1rem;color:#ff6b6b;font-size:.85rem;line-height:1.4}
+.auth-help{margin-top:1rem;color:var(--text2);font-size:.78rem;line-height:1.45}
+.n-logout-btn{background:transparent;border:1px solid rgba(255,255,255,.22);color:var(--text2);padding:7px 10px;border-radius:4px;font-size:.78rem;cursor:pointer}
+.n-logout-btn:hover{border-color:#fff;color:#fff}
+
+/* ── CONFIG WARNING ── */
+#cfg-warn{position:fixed;top:0;left:0;right:0;background:#c0392b;color:#fff;text-align:center;padding:10px;font-size:.85rem;z-index:999;display:none}
+
+@media(max-width:650px){
+  .h-title{font-size:2rem}
+  #hero-content{max-width:90%}
+  .m-top{flex-direction:column}
+  nav{padding:.8rem 1rem}
+  .n-links{display:none}
+  .row-scroller{padding:0 1rem .5rem}
+  .row-title{padding:0 1rem}
+}
+</style>
+</head>
+<body>
+
+<!-- ══ AUTH LOGIN ════════════════════════════════════════ -->
+<div id="auth-screen">
+  <div class="auth-card">
+    <div class="auth-logo">CinéHome</div>
+    <div class="auth-title">Connexion requise</div>
+    <div class="auth-sub">Connecte-toi avec le compte Firebase que tu as créé pour accéder au catalogue.</div>
+    <form id="auth-form">
+      <div class="auth-fg">
+        <label>Email</label>
+        <input type="email" id="auth-email" autocomplete="email" required>
+      </div>
+      <div class="auth-fg">
+        <label>Mot de passe</label>
+        <input type="password" id="auth-pass" autocomplete="current-password" required>
+      </div>
+      <button class="auth-btn" type="submit">Se connecter</button>
+      <div class="auth-error" id="auth-error"></div>
+    </form>
+    <div class="auth-help">Les comptes doivent être créés dans Firebase → Authentication → Users.</div>
+  </div>
+</div>
+
+
+<div id="cfg-warn">⚠ Configuration manquante — Veuillez renseigner vos clés Firebase et TMDB dans le fichier index.html</div>
+
+<!-- ══ PROFILES ═══════════════════════════════════════════ -->
+<div id="screen-profiles">
+  <div class="p-logo">CinéHome</div>
+  <div class="p-title">Qui regarde ?</div>
+  <div class="p-grid" id="p-grid"></div>
+  <button class="p-manage" onclick="openMgr()">Gérer les profils</button>
+</div>
+
+<!-- ══ MAIN APP ═══════════════════════════════════════════ -->
+<div id="screen-main" class="hidden">
+  <nav id="navbar">
+    <div class="n-logo">CinéHome</div>
+    <ul class="n-links">
+      <li><a class="active" data-filter="all" onclick="setCatalogFilter('all',this)">Accueil</a></li>
+      <li><a data-filter="film" onclick="setCatalogFilter('film',this)">Films</a></li>
+      <li><a data-filter="serie" onclick="setCatalogFilter('serie',this)">Séries</a></li>
+      <li><a data-filter="watchlist" onclick="setCatalogFilter('watchlist',this)">À regarder</a></li>
+      <li><a data-filter="watching" onclick="setCatalogFilter('watching',this)">En cours</a></li>
+      <li><a data-filter="seen" onclick="setCatalogFilter('seen',this)">Vus</a></li>
+      <li><a data-filter="rated" onclick="setCatalogFilter('rated',this)">Notés</a></li>
+    </ul>
+    <div class="n-right">
+      <button class="n-search-btn" onclick="openSearch()">🔍</button>
+      <button class="n-search-btn" title="Resynchroniser les plateformes" onclick="syncCustomProviders();showToast('Recherche des plateformes relancée','info')">🔄</button>
+      <button class="n-logout-btn" onclick="logoutAuth()">Déconnexion</button>
+      <div class="n-profile-wrap" onclick="switchProfile()">
+        <div class="n-pav" id="n-pav"></div>
+        <span class="n-pname" id="n-pname"></span>
+        <span style="color:var(--text2);font-size:.65rem;margin-left:2px">▼</span>
+      </div>
+    </div>
+  </nav>
+
+  <div id="hero">
+    <div id="hero-bg"></div>
+    <div id="hero-content">
+      <div class="h-type" id="h-type"></div>
+      <div class="h-title" id="h-title">—</div>
+      <div class="h-meta">
+        <span class="h-imdb" id="h-imdb" style="display:none"></span>
+        <span class="h-tag" id="h-genre"></span>
+        <span class="h-tag" id="h-year"></span>
+      </div>
+      <div class="h-desc" id="h-desc"></div>
+      <div class="h-btns">
+        <button class="h-btn h-btn-gray" id="h-seen-btn" onclick="heroToggleSeen()">+ Marquer vu</button>
+        <button class="h-btn h-btn-white" onclick="heroDetail()">ℹ Détails</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="catalog"></div>
+</div>
+
+<!-- ══ SEARCH ═════════════════════════════════════════════ -->
+<div id="search-overlay" class="hidden">
+  <div class="s-header">
+    <div class="s-input-wrap"><input type="text" id="s-input" placeholder="Titre, genre..." autocomplete="off"></div>
+    <button class="s-close" onclick="closeSearch()">✕</button>
+  </div>
+  <div id="s-local-wrap" style="display:none">
+    <div class="s-section-title">Dans ta liste</div>
+    <div class="s-grid" id="s-local"></div>
+  </div>
+  <div id="s-tmdb-wrap" style="display:none">
+    <div class="s-section-title">Résultats TMDB — cliquer pour ajouter</div>
+    <div class="s-grid" id="s-tmdb"></div>
+  </div>
+  <div id="s-for-you-wrap" style="display:none">
+    <div class="s-section-title">Suggestions pour vous — selon vos notes</div>
+    <div class="s-row">
+      <button class="s-arrow left" onclick="document.getElementById('s-for-you').scrollBy({left:-700,behavior:'smooth'})">❮</button>
+      <div class="s-row-scroll" id="s-for-you"></div>
+      <button class="s-arrow right" onclick="document.getElementById('s-for-you').scrollBy({left:700,behavior:'smooth'})">❯</button>
+    </div>
+  </div>
+  <div id="s-suggestions-wrap">
+    <div class="s-section-title">Suggestions à ajouter au CinéHome</div>
+    <div class="s-row">
+      <button class="s-arrow left" onclick="document.getElementById('s-suggestions').scrollBy({left:-700,behavior:'smooth'})">❮</button>
+      <div class="s-row-scroll" id="s-suggestions"></div>
+      <button class="s-arrow right" onclick="document.getElementById('s-suggestions').scrollBy({left:700,behavior:'smooth'})">❯</button>
+    </div>
+  </div>
+  <div id="s-empty" class="s-no-result hidden">Aucun résultat trouvé pour cette recherche.</div>
+  <button class="s-manual-btn" id="s-manual-btn" style="display:none" onclick="openAddManual()">+ Ajouter manuellement</button>
+</div>
+
+<!-- ══ DETAIL MODAL ════════════════════════════════════════ -->
+<div id="modal-ov" class="hidden" onclick="if(event.target===this)closeModal()">
+  <div id="modal">
+    <div class="m-back" id="m-back">
+      <button class="m-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="m-body">
+      <div class="m-top">
+        <div id="m-poster-wrap"></div>
+        <div class="m-info">
+          <div class="m-title" id="m-title"></div>
+          <div class="m-meta" id="m-meta"></div>
+          <div class="m-plts" id="m-plts"></div>
+        </div>
+      </div>
+      <div class="m-sl">Statut</div>
+      <div class="status-tabs" id="m-status-tabs"></div>
+      <div id="m-seasons-wrap" style="display:none">
+        <div class="m-sl">Saisons vues</div>
+        <div class="season-list" id="m-seasons"></div>
+      </div>
+      <div class="m-overview" id="m-overview"></div>
+      <div class="m-sl">Ma note personnelle</div>
+      <div class="m-stars" id="m-stars"></div>
+      <div class="m-sl" style="margin-top:1.2rem">Mes impressions</div>
+      <textarea class="m-note" id="m-note" placeholder="Ce que tu as aimé, des scènes marquantes, des acteurs..."></textarea>
+      <div class="m-btns">
+        <button class="m-btn m-btn-seen" id="m-seen-btn" onclick="modalToggleSeen()"></button>
+        <button class="m-btn m-btn-save" onclick="modalSave()">💾 Sauvegarder</button>
+        <button class="m-btn m-btn-del" id="m-del-btn" onclick="modalDelete()" style="display:none">🗑 Retirer</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ ADD MANUAL ══════════════════════════════════════════ -->
+<div id="add-ov" class="hidden" onclick="if(event.target===this)closeAddManual()">
+  <div id="add-modal">
+    <h2>Ajouter manuellement</h2>
+    <div class="fg"><label>Titre *</label><input type="text" id="af-t" placeholder="Ex: Inception"></div>
+    <div class="frow">
+      <div class="fg"><label>Type *</label><select id="af-type"><option value="film">Film</option><option value="serie">Série</option></select></div>
+      <div class="fg"><label>Année</label><input type="number" id="af-y" placeholder="2024" min="1900" max="2030"></div>
+    </div>
+    <div class="frow">
+      <div class="fg"><label>Genre</label><select id="af-g">
+        <option>Crime</option><option>Thriller</option><option>Espionnage</option><option>Guerre</option>
+        <option>Militaire</option><option>Drame</option><option>Sci-Fi</option><option>Action</option>
+        <option>Comédie</option><option>Horreur</option><option>Animation</option><option>Autre</option><option value="__new__">+ Nouveau genre</option>
+      </select><input type="text" id="af-g-new" placeholder="Ex: Aventure, Fantastique..." style="display:none;margin-top:8px"></div>
+      <div class="fg"><label>Note IMDB</label><input type="number" id="af-imdb" placeholder="7.5" min="0" max="10" step="0.1"></div>
+    </div>
+    <div class="fg"><label>Plateformes (virgule)</label><input type="text" id="af-plt" placeholder="Netflix, Prime Video..."></div>
+    <div class="fg"><label>Mes impressions</label><textarea id="af-note" placeholder="Notes personnelles..."></textarea></div>
+    <div class="fa">
+      <button class="fa-btn fa-cancel" onclick="closeAddManual()">Annuler</button>
+      <button class="fa-btn fa-save" onclick="saveManualEntry()">Ajouter</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MANAGE PROFILES ═════════════════════════════════════ -->
+<div id="mgr-ov" class="hidden" onclick="if(event.target===this)closeMgr()">
+  <div id="mgr-modal">
+    <h2>Gérer les profils</h2>
+    <div id="mgr-list"></div>
+    <div id="new-p-form" style="margin-top:1.5rem;display:none">
+      <div class="fg"><label>Nom</label><input type="text" id="np-name" placeholder="Ex: Marie" maxlength="20"></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:1rem" id="color-pick"></div>
+      <div class="fa">
+        <button class="fa-btn fa-cancel" onclick="document.getElementById('new-p-form').style.display='none'">Annuler</button>
+        <button class="fa-btn fa-save" onclick="createProfile()">Créer</button>
+      </div>
+    </div>
+    <button class="fa-btn fa-save" style="width:100%;margin-top:1rem;border-radius:4px"
+      onclick="document.getElementById('new-p-form').style.display='block';buildColorPick();document.getElementById('np-name').focus()">+ Nouveau profil</button>
+    <div class="fa" style="margin-top:1rem"><button class="fa-btn fa-cancel" onclick="closeMgr()">Fermer</button></div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+
+<script>
+// ══════════════════════════════════════════════════════
+// 🔧  CONFIGURATION  —  À MODIFIER
+// ══════════════════════════════════════════════════════
+const FIREBASE_CONFIG = {
+  apiKey:            "AIzaSyDjeJTmsduZOfop8A7GtHNLOHqrkagAXEg",
+  authDomain:        "test-e693a.firebaseapp.com",
+  projectId:         "test-e693a",
+  storageBucket:     "test-e693a.firebasestorage.app",
+  messagingSenderId: "22119073612",
+  appId:             "1:22119073612:web:8f89a307ead52c9b3f71e9"
+};
+const TMDB_KEY = "0430db9ec540f4a87577237bf54e8cd0"; // themoviedb.org → Paramètres → API
+const WATCHMODE_KEY = "RqiTrNakSiFFQmybE5IWtGrnpgxDAUcL5jzmBmy7"; // Watchmode API
+
+// ══════════════════════════════════════════════════════
+// 📋  CATALOGUE DE BASE
+// ══════════════════════════════════════════════════════
+const CATALOG = [
+  // ── CRIME films
+  {id:"heat95",t:"Heat",type:"film",imdb:8.3,genre:"Crime",plt:["prime","multi"],y:1995},
+  {id:"affranchis90",t:"Les Affranchis",type:"film",imdb:8.7,genre:"Crime",plt:["netflix","prime"],y:1990},
+  {id:"parrain72",t:"Le Parrain",type:"film",imdb:9.2,genre:"Crime",plt:["prime","paramount"],y:1972},
+  {id:"parrain274",t:"Le Parrain II",type:"film",imdb:9.0,genre:"Crime",plt:["prime","paramount"],y:1974},
+  {id:"sicario15",t:"Sicario",type:"film",imdb:7.6,genre:"Crime",plt:["netflix","prime"],y:2015},
+  {id:"sicario218",t:"Sicario 2",type:"film",imdb:7.3,genre:"Crime",plt:["netflix","prime"],y:2018},
+  {id:"donnieb97",t:"Donnie Brasco",type:"film",imdb:7.8,genre:"Crime",plt:["prime","multi"],y:1997},
+  {id:"incorr87",t:"Les Incorruptibles",type:"film",imdb:7.9,genre:"Crime",plt:["prime","multi"],y:1987},
+  {id:"pubene09",t:"Public Enemies",type:"film",imdb:7.0,genre:"Crime",plt:["prime","multi"],y:2009},
+  {id:"bronx93",t:"Il était une fois le Bronx",type:"film",imdb:7.8,genre:"Crime",plt:["multi"],y:1993},
+  {id:"amerique84",t:"Il était une fois en Amérique",type:"film",imdb:8.3,genre:"Crime",plt:["prime","multi"],y:1984},
+  {id:"scarface83",t:"Scarface",type:"film",imdb:8.3,genre:"Crime",plt:["netflix"],y:1983},
+  {id:"amgang07",t:"American Gangster",type:"film",imdb:7.8,genre:"Crime",plt:["netflix","prime"],y:2007},
+  {id:"cityofgod02",t:"City of God",type:"film",imdb:8.6,genre:"Crime",plt:["netflix"],y:2002},
+  {id:"lordwar05",t:"Lord of War",type:"film",imdb:7.6,genre:"Crime",plt:["prime","multi"],y:2005},
+  {id:"triple916",t:"Triple 9",type:"film",imdb:6.6,genre:"Crime",plt:["prime","multi"],y:2016},
+  {id:"triplef19",t:"Triple Frontière",type:"film",imdb:6.5,genre:"Crime",plt:["netflix"],y:2019},
+  {id:"irishman19",t:"The Irishman",type:"film",imdb:7.8,genre:"Crime",plt:["netflix"],y:2019},
+  // ── THRILLER films
+  {id:"ampsycho00",t:"American Psycho",type:"film",imdb:7.6,genre:"Thriller",plt:["netflix","prime"],y:2000},
+  {id:"amhist98",t:"American History X",type:"film",imdb:8.5,genre:"Thriller",plt:["prime","multi"],y:1998},
+  {id:"trainday01",t:"Training Day",type:"film",imdb:7.7,genre:"Thriller",plt:["prime","multi"],y:2001},
+  {id:"usualsusp95",t:"The Usual Suspects",type:"film",imdb:8.5,genre:"Thriller",plt:["prime","multi"],y:1995},
+  {id:"shutter10",t:"Shutter Island",type:"film",imdb:8.2,genre:"Thriller",plt:["netflix","prime"],y:2010},
+  {id:"inception10",t:"Inception",type:"film",imdb:8.8,genre:"Thriller",plt:["netflix","prime"],y:2010},
+  {id:"fightclub99",t:"Fight Club",type:"film",imdb:8.8,genre:"Thriller",plt:["disney","prime"],y:1999},
+  {id:"memento00",t:"Memento",type:"film",imdb:8.5,genre:"Thriller",plt:["prime","multi"],y:2000},
+  {id:"prestige06",t:"The Prestige",type:"film",imdb:8.5,genre:"Thriller",plt:["netflix","prime"],y:2006},
+  {id:"prisoners13",t:"Prisoners",type:"film",imdb:8.1,genre:"Thriller",plt:["prime","multi"],y:2013},
+  {id:"thegame97",t:"The Game",type:"film",imdb:7.7,genre:"Thriller",plt:["prime","multi"],y:1997},
+  {id:"nightcrawl14",t:"Nightcrawler",type:"film",imdb:7.9,genre:"Thriller",plt:["netflix","prime"],y:2014},
+  {id:"taxidriver76",t:"Taxi Driver",type:"film",imdb:8.2,genre:"Thriller",plt:["prime","multi"],y:1976},
+  {id:"pulpfiction94",t:"Pulp Fiction",type:"film",imdb:8.9,genre:"Thriller",plt:["prime","multi"],y:1994},
+  {id:"oldboy03",t:"Oldboy",type:"film",imdb:8.4,genre:"Thriller",plt:["multi"],y:2003},
+  {id:"orangemec71",t:"Orange Mécanique",type:"film",imdb:8.3,genre:"Thriller",plt:["prime","multi"],y:1971},
+  {id:"donnieda01",t:"Donnie Darko",type:"film",imdb:8.0,genre:"Thriller",plt:["prime","multi"],y:2001},
+  {id:"enemy13",t:"Enemy",type:"film",imdb:6.9,genre:"Thriller",plt:["prime","multi"],y:2013},
+  // ── ESPIONNAGE films
+  {id:"spygame01",t:"Spy Game",type:"film",imdb:7.5,genre:"Espionnage",plt:["prime","multi"],y:2001},
+  {id:"tinkert11",t:"Tinker Tailor Soldier Spy",type:"film",imdb:7.1,genre:"Espionnage",plt:["prime","multi"],y:2011},
+  {id:"bospies15",t:"Bridge of Spies",type:"film",imdb:7.6,genre:"Espionnage",plt:["disney","prime"],y:2015},
+  {id:"bodylies08",t:"Body of Lies",type:"film",imdb:7.1,genre:"Espionnage",plt:["prime","multi"],y:2008},
+  {id:"zdt12",t:"Zero Dark Thirty",type:"film",imdb:7.4,genre:"Espionnage",plt:["prime","multi"],y:2012},
+  {id:"argo12",t:"Argo",type:"film",imdb:7.7,genre:"Espionnage",plt:["prime","multi"],y:2012},
+  {id:"munich05",t:"Munich",type:"film",imdb:7.6,genre:"Espionnage",plt:["prime","multi"],y:2005},
+  {id:"enemystate98",t:"Enemy of the State",type:"film",imdb:7.3,genre:"Espionnage",plt:["prime","multi"],y:1998},
+  {id:"ronin98",t:"Ronin",type:"film",imdb:7.3,genre:"Espionnage",plt:["prime","multi"],y:1998},
+  {id:"courier20",t:"The Courier",type:"film",imdb:7.2,genre:"Espionnage",plt:["prime","multi"],y:2020},
+  {id:"salt10",t:"Salt",type:"film",imdb:6.4,genre:"Espionnage",plt:["prime","multi"],y:2010},
+  {id:"atomblonde17",t:"Atomic Blonde",type:"film",imdb:6.7,genre:"Espionnage",plt:["prime","multi"],y:2017},
+  {id:"uncle15",t:"The Man from U.N.C.L.E.",type:"film",imdb:7.3,genre:"Espionnage",plt:["prime","multi"],y:2015},
+  {id:"bourne02",t:"The Bourne Identity",type:"film",imdb:7.9,genre:"Espionnage",plt:["prime","multi"],y:2002},
+  {id:"tenet20",t:"Tenet",type:"film",imdb:7.3,genre:"Sci-Fi",plt:["prime","canal"],y:2020},
+  // ── GUERRE films
+  {id:"spr98",t:"Saving Private Ryan",type:"film",imdb:8.6,genre:"Guerre",plt:["prime","multi"],y:1998},
+  {id:"bhd01",t:"Black Hawk Down",type:"film",imdb:7.7,genre:"Guerre",plt:["prime","multi"],y:2001},
+  {id:"fury14",t:"Fury",type:"film",imdb:7.6,genre:"Guerre",plt:["netflix","prime"],y:2014},
+  {id:"dunkirk17",t:"Dunkirk",type:"film",imdb:7.9,genre:"Guerre",plt:["netflix","prime"],y:2017},
+  {id:"hacksaw16",t:"Hacksaw Ridge",type:"film",imdb:8.1,genre:"Guerre",plt:["prime","multi"],y:2016},
+  {id:"hurtlocker08",t:"The Hurt Locker",type:"film",imdb:7.6,genre:"Guerre",plt:["prime","multi"],y:2008},
+  {id:"lonesurviv13",t:"Lone Survivor",type:"film",imdb:7.5,genre:"Guerre",plt:["prime","multi"],y:2013},
+  {id:"amsniper14",t:"American Sniper",type:"film",imdb:7.3,genre:"Guerre",plt:["prime","multi"],y:2014},
+  {id:"13hours16",t:"13 Hours",type:"film",imdb:7.3,genre:"Guerre",plt:["prime","multi"],y:2016},
+  {id:"capphil13",t:"Capitaine Phillips",type:"film",imdb:7.8,genre:"Guerre",plt:["prime","multi"],y:2013},
+  {id:"greyhound20",t:"Greyhound",type:"film",imdb:7.0,genre:"Guerre",plt:["apple"],y:2020},
+  {id:"zonehostile19",t:"Zone Hostile",type:"film",imdb:6.6,genre:"Guerre",plt:["netflix"],y:2019},
+  // ── DRAME films
+  {id:"forrest94",t:"Forrest Gump",type:"film",imdb:8.8,genre:"Drame",plt:["prime","multi"],y:1994},
+  {id:"greenbook18",t:"Green Book",type:"film",imdb:8.2,genre:"Drame",plt:["prime","multi"],y:2018},
+  {id:"castaway00",t:"Seul au monde",type:"film",imdb:7.8,genre:"Drame",plt:["prime","multi"],y:2000},
+  {id:"negociateur98",t:"Négociateur",type:"film",imdb:7.3,genre:"Drame",plt:["prime","multi"],y:1998},
+  // ── CRIME séries
+  {id:"bb08",t:"Breaking Bad",type:"serie",imdb:9.5,genre:"Crime",plt:["netflix"],y:2008},
+  {id:"bcs15",t:"Better Call Saul",type:"serie",imdb:9.0,genre:"Crime",plt:["netflix"],y:2015},
+  {id:"sopranos99",t:"The Sopranos",type:"serie",imdb:9.2,genre:"Crime",plt:["prime","hbo"],y:1999},
+  {id:"wire02",t:"The Wire",type:"serie",imdb:9.3,genre:"Crime",plt:["prime","hbo"],y:2002},
+  {id:"ozark17",t:"Ozark",type:"serie",imdb:8.5,genre:"Crime",plt:["netflix"],y:2017},
+  {id:"snowfall17",t:"Snowfall",type:"serie",imdb:8.2,genre:"Crime",plt:["multi","canal"],y:2017},
+  {id:"gomorrah14",t:"Gomorrah",type:"serie",imdb:8.7,genre:"Crime",plt:["canal","multi"],y:2014},
+  {id:"zzz20",t:"ZeroZeroZero",type:"serie",imdb:8.2,genre:"Crime",plt:["prime","canal"],y:2020},
+  {id:"topboy11",t:"Top Boy",type:"serie",imdb:8.3,genre:"Crime",plt:["netflix"],y:2011},
+  {id:"atlanta16",t:"Atlanta",type:"serie",imdb:8.6,genre:"Crime",plt:["disney"],y:2016},
+  {id:"banshee13",t:"Banshee",type:"serie",imdb:8.4,genre:"Crime",plt:["prime","multi"],y:2013},
+  {id:"blacksails14",t:"Black Sails",type:"serie",imdb:8.2,genre:"Crime",plt:["prime","multi"],y:2014},
+  {id:"thechi18",t:"The Chi",type:"serie",imdb:7.7,genre:"Crime",plt:["prime","multi"],y:2018},
+  // ── THRILLER séries
+  {id:"mindhunt17",t:"Mindhunter",type:"serie",imdb:8.6,genre:"Thriller",plt:["netflix"],y:2017},
+  {id:"truedet14",t:"True Detective",type:"serie",imdb:9.0,genre:"Thriller",plt:["prime","hbo"],y:2014},
+  {id:"mrrobot15",t:"Mr. Robot",type:"serie",imdb:8.5,genre:"Thriller",plt:["prime","multi"],y:2015},
+  {id:"severance22",t:"Severance",type:"serie",imdb:8.7,genre:"Thriller",plt:["apple"],y:2022},
+  {id:"bosch14",t:"Bosch",type:"serie",imdb:8.3,genre:"Thriller",plt:["prime"],y:2014},
+  {id:"poi11",t:"Person of Interest",type:"serie",imdb:8.4,genre:"Thriller",plt:["prime","multi"],y:2011},
+  {id:"oldman22",t:"The Old Man",type:"serie",imdb:7.8,genre:"Thriller",plt:["disney","multi"],y:2022},
+  {id:"rabbithole23",t:"Rabbit Hole",type:"serie",imdb:7.3,genre:"Thriller",plt:["multi","paramount"],y:2023},
+  {id:"ballard24",t:"Ballard",type:"serie",imdb:7.5,genre:"Thriller",plt:["multi"],y:2024},
+  // ── ESPIONNAGE séries
+  {id:"americans13",t:"The Americans",type:"serie",imdb:8.4,genre:"Espionnage",plt:["prime","multi"],y:2013},
+  {id:"homeland11",t:"Homeland",type:"serie",imdb:8.2,genre:"Espionnage",plt:["prime","canal"],y:2011},
+  {id:"bureau15",t:"Le Bureau des Légendes",type:"serie",imdb:8.8,genre:"Espionnage",plt:["canal","multi"],y:2015},
+  {id:"slowhorses22",t:"Slow Horses",type:"serie",imdb:8.2,genre:"Espionnage",plt:["apple"],y:2022},
+  {id:"jackryan18",t:"Jack Ryan",type:"serie",imdb:8.0,genre:"Espionnage",plt:["prime"],y:2018},
+  {id:"nightmgr16",t:"The Night Manager",type:"serie",imdb:8.1,genre:"Espionnage",plt:["prime","multi"],y:2016},
+  {id:"counterpart17",t:"Counterpart",type:"serie",imdb:8.2,genre:"Espionnage",plt:["multi"],y:2017},
+  {id:"condor18",t:"Condor",type:"serie",imdb:7.0,genre:"Espionnage",plt:["multi","canal"],y:2018},
+  {id:"tehran20",t:"Tehran",type:"serie",imdb:7.7,genre:"Espionnage",plt:["apple"],y:2020},
+  {id:"fauda15",t:"Fauda",type:"serie",imdb:8.1,genre:"Espionnage",plt:["netflix"],y:2015},
+  {id:"bodyguard18",t:"Bodyguard",type:"serie",imdb:8.0,genre:"Espionnage",plt:["netflix"],y:2018},
+  {id:"spooks02",t:"Spooks (MI-5)",type:"serie",imdb:8.0,genre:"Espionnage",plt:["multi"],y:2002},
+  {id:"deut8315",t:"Deutschland 83",type:"serie",imdb:8.0,genre:"Espionnage",plt:["prime","multi"],y:2015},
+  {id:"berlinst16",t:"Berlin Station",type:"serie",imdb:7.0,genre:"Espionnage",plt:["multi","canal"],y:2016},
+  {id:"kingdom19",t:"Kingdom",type:"serie",imdb:8.4,genre:"Espionnage",plt:["netflix"],y:2019},
+  {id:"patriot15",t:"Patriot",type:"serie",imdb:8.2,genre:"Espionnage",plt:["prime"],y:2015},
+  // ── MILITAIRE séries
+  {id:"six17",t:"Six",type:"serie",imdb:7.6,genre:"Militaire",plt:["multi"],y:2017},
+  {id:"sealteam17",t:"SEAL Team",type:"serie",imdb:7.9,genre:"Militaire",plt:["prime","paramount"],y:2017},
+  {id:"strikeback10",t:"Strike Back",type:"serie",imdb:7.9,genre:"Militaire",plt:["multi","hbo"],y:2010},
+  {id:"theunit06",t:"The Unit",type:"serie",imdb:8.0,genre:"Militaire",plt:["multi"],y:2006},
+  {id:"thebrave17",t:"The Brave",type:"serie",imdb:7.5,genre:"Militaire",plt:["multi"],y:2017},
+  {id:"warrior19",t:"Warrior",type:"serie",imdb:8.5,genre:"Militaire",plt:["prime","hbo"],y:2019},
+  {id:"termlist22",t:"The Terminal List",type:"serie",imdb:7.5,genre:"Militaire",plt:["prime"],y:2022},
+  {id:"recruit22",t:"The Recruit",type:"serie",imdb:7.2,genre:"Militaire",plt:["netflix"],y:2022},
+  {id:"nightagent23",t:"The Night Agent",type:"serie",imdb:7.2,genre:"Militaire",plt:["netflix"],y:2023},
+  {id:"lioness23",t:"Lioness",type:"serie",imdb:7.9,genre:"Militaire",plt:["prime","paramount"],y:2023},
+  // ── SCI-FI séries
+  {id:"westworld16",t:"Westworld",type:"serie",imdb:8.6,genre:"Sci-Fi",plt:["prime","hbo"],y:2016},
+  {id:"leftovers14",t:"The Leftovers",type:"serie",imdb:8.3,genre:"Sci-Fi",plt:["prime","hbo"],y:2014},
+  {id:"altcarbon18",t:"Altered Carbon",type:"serie",imdb:8.0,genre:"Sci-Fi",plt:["netflix"],y:2018},
+  {id:"foundation21",t:"Foundation",type:"serie",imdb:7.4,genre:"Sci-Fi",plt:["apple"],y:2021},
+  {id:"expanse15",t:"The Expanse",type:"serie",imdb:8.5,genre:"Sci-Fi",plt:["prime"],y:2015},
+  {id:"maniac18",t:"Maniac",type:"serie",imdb:7.8,genre:"Sci-Fi",plt:["netflix"],y:2018},
+  {id:"pantheon22",t:"Pantheon",type:"serie",imdb:7.9,genre:"Sci-Fi",plt:["multi"],y:2022},
+  {id:"arcane21",t:"Arcane",type:"serie",imdb:9.0,genre:"Sci-Fi",plt:["netflix"],y:2021},
+  {id:"edgerunners22",t:"Cyberpunk Edgerunners",type:"serie",imdb:8.8,genre:"Sci-Fi",plt:["netflix"],y:2022},
+  {id:"ldr19",t:"Love, Death & Robots",type:"serie",imdb:8.4,genre:"Sci-Fi",plt:["netflix"],y:2019},
+  {id:"dark17",t:"Dark",type:"serie",imdb:8.8,genre:"Sci-Fi",plt:["netflix"],y:2017},
+  {id:"devs20",t:"Devs",type:"serie",imdb:7.8,genre:"Sci-Fi",plt:["prime","multi"],y:2020},
+  {id:"blackmirror11",t:"Black Mirror",type:"serie",imdb:8.3,genre:"Sci-Fi",plt:["netflix"],y:2011},
+  {id:"invincible21",t:"Invincible",type:"serie",imdb:8.7,genre:"Sci-Fi",plt:["prime"],y:2021},
+  // ── DRAME séries
+  {id:"thisIsUs16",t:"This Is Us",type:"serie",imdb:8.7,genre:"Drame",plt:["prime","multi"],y:2016},
+  {id:"genv23",t:"Gen V",type:"serie",imdb:7.8,genre:"Drame",plt:["prime"],y:2023},
+];
+
+const PLT_LBL={netflix:"Netflix",prime:"Prime Video",apple:"Apple TV+",hbo:"Max/HBO",disney:"Disney+",paramount:"Paramount+",canal:"Canal+",multi:"VOD/Multi"};
+const TMDB_GENRES_MOVIE={
+  28:"Action",12:"Aventure",16:"Animation",35:"Comédie",80:"Crime",99:"Documentaire",18:"Drame",10751:"Famille",
+  14:"Fantastique",36:"Historique",27:"Horreur",10402:"Musique",9648:"Mystère",10749:"Romance",878:"Sci-Fi",
+  10770:"Téléfilm",53:"Thriller",10752:"Guerre",37:"Western"
+};
+const TMDB_GENRES_TV={
+  10759:"Action & Aventure",16:"Animation",35:"Comédie",80:"Crime",99:"Documentaire",18:"Drame",10751:"Famille",
+  10762:"Jeunesse",9648:"Mystère",10763:"Actualité",10764:"Télé-réalité",10765:"Sci-Fi & Fantastique",
+  10766:"Soap",10767:"Talk-show",10768:"Guerre & Politique",37:"Western"
+};
+function normalizeAppGenre(g){
+  if(!g) return 'Autre';
+  const aliases={
+    'Action & Aventure':'Action',
+    'Action & Adventure':'Action',
+    'Sci-Fi & Fantastique':'Sci-Fi',
+    'Science-Fiction & Fantastique':'Sci-Fi',
+    'Guerre & Politique':'Guerre',
+    'War & Politics':'Guerre',
+    'Mystère':'Thriller'
+  };
+  return aliases[g]||g;
+}
+function getTmdbGenre(r){
+  const map=r.media_type==='movie'?TMDB_GENRES_MOVIE:TMDB_GENRES_TV;
+  const ids=r.genre_ids||[];
+  return normalizeAppGenre(ids.length && map[ids[0]] ? map[ids[0]] : 'Autre');
+}
+function getGenreFromIds(type,ids){
+  const map=type==='film'?TMDB_GENRES_MOVIE:TMDB_GENRES_TV;
+  ids=ids||[];
+  return normalizeAppGenre(ids.length && map[ids[0]] ? map[ids[0]] : 'Autre');
+}
+const P_COLORS=["#e50914","#7c5cfc","#1db954","#f5c518","#4a9eff","#e67e22"];
+const TMDB_IMG="https://image.tmdb.org/t/p/";
+function normalizeProviderName(name){
+  return (name||'').replace('Amazon Prime Video','Prime Video').replace('Disney Plus','Disney+');
+}
+function providerToPlatformKey(name){
+  const n=(name||'').toLowerCase();
+  if(n.includes('netflix')) return 'netflix';
+  if(n.includes('prime')||n.includes('amazon')) return 'prime';
+  if(n.includes('apple')) return 'apple';
+  if(n.includes('hbo')||n.includes('max')) return 'hbo';
+  if(n.includes('disney')) return 'disney';
+  if(n.includes('paramount')) return 'paramount';
+  if(n.includes('canal')) return 'canal';
+  return 'multi';
+}
+async function tmdbProviders(ep,id){
+  if(!TMDB_KEY||TMDB_KEY==='VOTRE_CLE_TMDB'||!id) return [];
+  try{
+    const r=await fetch(`https://api.themoviedb.org/3/${ep}/${id}/watch/providers?api_key=${TMDB_KEY}`);
+    const d=await r.json();
+    const fr=d.results?.FR||d.results?.US||{};
+    const list=[...(fr.flatrate||[]),...(fr.ads||[]),...(fr.free||[]),...(fr.rent||[]),...(fr.buy||[])];
+    const names=[...new Set(list.map(p=>normalizeProviderName(p.provider_name)).filter(Boolean))];
+    return names.slice(0,8);
+  }catch{
+    return [];
+  }
+}
+async function watchmodeProviders(title,type,year){
+  if(!WATCHMODE_KEY||!title) return [];
+  try{
+    const searchUrl=`https://api.watchmode.com/v1/search/?apiKey=${WATCHMODE_KEY}&search_field=name&search_value=${encodeURIComponent(title)}`;
+    const sr=await fetch(searchUrl);
+    const sd=await sr.json();
+    const results=sd.title_results||sd.results||[];
+    if(!results.length) return [];
+
+    const wantedType=type==='film'?'movie':'tv_series';
+    let match=results.find(x=>
+      (x.type===wantedType || !x.type) &&
+      normalizeTitleForDuplicate(x.name||x.title)===normalizeTitleForDuplicate(title)
+    ) || results.find(x=>x.type===wantedType) || results[0];
+
+    if(!match?.id) return [];
+    const srcUrl=`https://api.watchmode.com/v1/title/${match.id}/sources/?apiKey=${WATCHMODE_KEY}&regions=FR`;
+    const rr=await fetch(srcUrl);
+    const data=await rr.json();
+    const list=Array.isArray(data)?data:(data.sources||[]);
+    const names=[...new Set(list
+      .filter(s=>!s.region || s.region==='FR' || s.country==='FR')
+      .map(s=>normalizeProviderName(s.name||s.source_name||s.web_url||''))
+      .filter(Boolean)
+    )];
+    return names.slice(0,10);
+  }catch(e){
+    console.warn('Watchmode indisponible',e);
+    return [];
+  }
+}
+async function findProviders(title,type,tmdbEp,tmdbId,year){
+  let providers=await tmdbProviders(tmdbEp,tmdbId);
+  if(providers.length) return providers;
+  providers=await watchmodeProviders(title,type,year);
+  return providers;
+}
+const HERO_IDS=["parrain72","bb08","wire02","truedet14","fightclub99","affranchis90","dark17","arcane21","inception10","bureau15"];
+const SUGGESTIONS=[
+  {t:"The Day of the Jackal",type:"serie",genre:"Espionnage"},{t:"Chicago Fire",type:"serie",genre:"Drame"},{t:"Godfather of Harlem",type:"serie",genre:"Crime"},{t:"The Rookie",type:"serie",genre:"Crime"},
+  {t:"Mayor of Kingstown",type:"serie",genre:"Crime"},{t:"Tulsa King",type:"serie",genre:"Crime"},{t:"Reacher",type:"serie",genre:"Action"},{t:"The Shield",type:"serie",genre:"Crime"},
+  {t:"Narcos",type:"serie",genre:"Crime"},{t:"Narcos: Mexico",type:"serie",genre:"Crime"},{t:"Peaky Blinders",type:"serie",genre:"Crime"},{t:"Sons of Anarchy",type:"serie",genre:"Crime"},
+  {t:"The Punisher",type:"serie",genre:"Action"},{t:"Gangs of London",type:"serie",genre:"Crime"},{t:"Animal Kingdom",type:"serie",genre:"Crime"},{t:"Fargo",type:"serie",genre:"Crime"},
+  {t:"Line of Duty",type:"serie",genre:"Crime"},{t:"The Night Of",type:"serie",genre:"Crime"},{t:"Mare of Easttown",type:"serie",genre:"Crime"},{t:"We Own This City",type:"serie",genre:"Crime"},
+  {t:"The Capture",type:"serie",genre:"Thriller"},{t:"The Little Drummer Girl",type:"serie",genre:"Espionnage"},{t:"A Spy Among Friends",type:"serie",genre:"Espionnage"},{t:"The Spy",type:"serie",genre:"Espionnage"},
+  {t:"Fauda",type:"serie",genre:"Espionnage"},{t:"Caliphate",type:"serie",genre:"Thriller"},{t:"Tehran",type:"serie",genre:"Espionnage"},{t:"The Terminal List",type:"serie",genre:"Militaire"},
+  {t:"Band of Brothers",type:"serie",genre:"Guerre"},{t:"The Pacific",type:"serie",genre:"Guerre"},{t:"Generation Kill",type:"serie",genre:"Guerre"},{t:"Masters of the Air",type:"serie",genre:"Guerre"},
+  {t:"The Expanse",type:"serie",genre:"Sci-Fi"},{t:"Silo",type:"serie",genre:"Sci-Fi"},{t:"For All Mankind",type:"serie",genre:"Sci-Fi"},{t:"3 Body Problem",type:"serie",genre:"Sci-Fi"},
+  {t:"The Departed",type:"film",genre:"Crime"},{t:"Casino",type:"film",genre:"Crime"},{t:"Carlito's Way",type:"film",genre:"Crime"},{t:"The Town",type:"film",genre:"Crime"},
+  {t:"Den of Thieves",type:"film",genre:"Crime"},{t:"End of Watch",type:"film",genre:"Crime"},{t:"Hell or High Water",type:"film",genre:"Crime"},{t:"Wind River",type:"film",genre:"Thriller"},
+  {t:"No Country for Old Men",type:"film",genre:"Thriller"},{t:"Collateral",type:"film",genre:"Thriller"},{t:"The Equalizer",type:"film",genre:"Action"},{t:"John Wick",type:"film",genre:"Action"},
+  {t:"The Accountant",type:"film",genre:"Action"},{t:"Man on Fire",type:"film",genre:"Action"},{t:"Extraction",type:"film",genre:"Action"},{t:"The Covenant",type:"film",genre:"Guerre"},
+  {t:"Lone Survivor",type:"film",genre:"Guerre"},{t:"12 Strong",type:"film",genre:"Guerre"},{t:"Sicario",type:"film",genre:"Crime"},{t:"Prisoners",type:"film",genre:"Thriller"}
+];
+let suggestionResults=[];
+let forYouResults=[];
+let suggestionQueueIndex=0;
+let forYouQueueIndex=0;
+let shuffledSuggestions=[];
+let shuffledForYou=[];
+
+function shuffleArray(arr){
+  const a=[...arr];
+  for(let i=a.length-1;i>0;i--){
+    const j=Math.floor(Math.random()*(i+1));
+    [a[i],a[j]]=[a[j],a[i]];
+  }
+  return a;
+}
+const APP_GENRE_TO_TMDB_MOVIE={
+  Action:28,Aventure:12,Animation:16,Comédie:35,Crime:80,Documentaire:99,Drame:18,Famille:10751,
+  Fantastique:14,Historique:36,Horreur:27,Musique:10402,Mystère:9648,Romance:10749,"Sci-Fi":878,
+  Thriller:53,Guerre:10752,Western:37
+};
+const APP_GENRE_TO_TMDB_TV={
+  Action:10759,Aventure:10759,Animation:16,Comédie:35,Crime:80,Documentaire:99,Drame:18,Famille:10751,
+  Mystère:9648,"Sci-Fi":10765,Fantastique:10765,Thriller:9648,Guerre:10768,Militaire:10768,Espionnage:10759,Western:37
+};
+const SEEN_SUGGESTION_IDS=new Set();
+
+
+
+// ══════════════════════════════════════════════════════
+// 🔥 FIREBASE
+// ══════════════════════════════════════════════════════
+let db, auth, authUser=null;
+try {
+  firebase.initializeApp(FIREBASE_CONFIG);
+  db = firebase.firestore();
+  auth = firebase.auth();
+} catch(e) {
+  document.getElementById('cfg-warn').style.display='block';
+}
+
+
+// ══════════════════════════════════════════════════════
+// 🔐 AUTHENTIFICATION FIREBASE
+// ══════════════════════════════════════════════════════
+function showAuthError(msg){
+  const el=document.getElementById('auth-error');
+  if(!el) return;
+  el.textContent=msg;
+  el.style.display='block';
+}
+function hideAuthError(){
+  const el=document.getElementById('auth-error');
+  if(el){el.textContent='';el.style.display='none';}
+}
+function authErrorMessage(code){
+  const map={
+    'auth/invalid-email':'Adresse email invalide.',
+    'auth/user-disabled':'Ce compte est désactivé.',
+    'auth/user-not-found':'Aucun compte trouvé avec cet email.',
+    'auth/wrong-password':'Mot de passe incorrect.',
+    'auth/invalid-credential':'Email ou mot de passe incorrect.',
+    'auth/too-many-requests':'Trop de tentatives. Réessaie plus tard.'
+  };
+  return map[code] || 'Connexion impossible. Vérifie l’email et le mot de passe.';
+}
+function logoutAuth(){
+  if(auth) auth.signOut();
+}
+document.addEventListener('DOMContentLoaded',()=>{
+  const form=document.getElementById('auth-form');
+  if(form){
+    form.addEventListener('submit',async(e)=>{
+      e.preventDefault();
+      hideAuthError();
+      const email=document.getElementById('auth-email').value.trim();
+      const pass=document.getElementById('auth-pass').value;
+      try{
+        await auth.signInWithEmailAndPassword(email,pass);
+      }catch(err){
+        showAuthError(authErrorMessage(err.code));
+      }
+    });
+  }
+
+  if(!auth){
+    showAuthError('Firebase Auth n’est pas initialisé. Vérifie la configuration Firebase.');
+    return;
+  }
+
+  auth.onAuthStateChanged(async(user)=>{
+    authUser=user;
+    const authScreen=document.getElementById('auth-screen');
+    const profileScreen=document.getElementById('screen-profiles');
+    const mainScreen=document.getElementById('screen-main');
+
+    if(!user){
+      if(authScreen) authScreen.style.display='flex';
+      if(profileScreen) profileScreen.classList.add('hidden');
+      if(mainScreen) mainScreen.classList.add('hidden');
+      return;
+    }
+
+    if(authScreen) authScreen.style.display='none';
+
+    try{
+      await init();
+    }catch(e){
+      console.error(e);
+      showToast('Erreur de chargement après connexion','err');
+    }
+  });
+});
+
+// ══════════════════════════════════════════════════════
+// 🗺 STATE
+// ══════════════════════════════════════════════════════
+let profiles=[], currentProfile=null, profileItems={}, customEntries=[];
+let heroItem=null, modalItem=null, currentRating=0, catFilter='all';
+let tmdbResults=[], searchTimer=null, selColor=null;
+
+// ══════════════════════════════════════════════════════
+// 💾 FIREBASE HELPERS
+// ══════════════════════════════════════════════════════
+async function loadProfiles(){
+  if(!db||!authUser) return;
+  const s=await db.collection('profiles').orderBy('createdAt').get();
+  profiles=s.docs.map(d=>({id:d.id,...d.data()}));
+}
+async function loadProfileData(){
+  if(!db||!authUser||!currentProfile) return;
+
+  const items=await db.collection('profiles').doc(currentProfile.id).collection('items').get();
+  profileItems={};
+  items.docs.forEach(d=>{profileItems[d.id]=d.data()});
+
+  // Les films/séries ajoutés doivent être communs à tous les profils.
+  // On lit les ajouts de tous les profils, on fusionne, puis on recopie les manquants partout.
+  const allCustoms=new Map();
+
+  const targetProfiles=profiles.length ? profiles : [currentProfile];
+  await Promise.all(targetProfiles.map(async p=>{
+    const snap=await db.collection('profiles').doc(p.id).collection('custom').get();
+    snap.docs.forEach(d=>{
+      const data={id:d.id,...d.data()};
+      allCustoms.set(data.id,data);
+    });
+  }));
+
+  customEntries=[...allCustoms.values()];
+
+  await syncCustomGenres();
+  await syncCustomsToAllProfiles();
+  await syncCustomProviders();
+}
+async function saveItem(id,data){
+  profileItems[id]={...(profileItems[id]||{}),...data};
+  if(db&&currentProfile) await db.collection('profiles').doc(currentProfile.id).collection('items').doc(id).set(profileItems[id],{merge:true});
+}
+async function saveCustom(entry){
+  // Un ajout est partagé avec tous les profils.
+  if(!customEntries.some(e=>e.id===entry.id)) customEntries.push(entry);
+  if(db) await syncCustomsToAllProfiles();
+}
+async function syncCustomGenres(){
+  if(!customEntries.length) return;
+  let changed=false;
+
+  for(const entry of customEntries){
+    if(!entry.genre || entry.genre==='Autre'){
+      const tmdb=await tmdbFetch(entry,true);
+      if(tmdb?.genre && tmdb.genre!=='Autre'){
+        entry.genre=tmdb.genre;
+        changed=true;
+      }
+      if(tmdb?.providers?.length){
+        entry.plt=tmdb.providers.map(providerToPlatformKey).filter((v,i,a)=>a.indexOf(v)===i);
+        changed=true;
+      }
+      if(entry.type==='serie' && tmdb?.seasons && !entry.seasons){
+        entry.seasons=tmdb.seasons;
+        changed=true;
+      }
+    }
+  }
+
+  if(changed && db && profiles.length){
+    await Promise.all(customEntries.map(entry =>
+      Promise.all(profiles.map(p =>
+        db.collection('profiles').doc(p.id).collection('custom').doc(entry.id).set(entry,{merge:true})
+      ))
+    ));
+  }
+
+  return changed;
+}
+async function syncCustomsToAllProfiles(){
+  if(!db || !profiles.length || !customEntries.length) return;
+  await Promise.all(customEntries.map(entry =>
+    Promise.all(profiles.map(p =>
+      db.collection('profiles').doc(p.id).collection('custom').doc(entry.id).set(entry,{merge:true})
+    ))
+  ));
+}
+async function syncCustomProviders(){
+  if(!customEntries.length) return;
+  let changed=false;
+
+  for(const entry of customEntries){
+    const hasPlatform=(entry.plt||[]).length>0;
+    const tmdb=await tmdbFetch(entry,true);
+
+    if(tmdb?.providers?.length && !hasPlatform){
+      entry.plt=tmdb.providers.map(providerToPlatformKey).filter((v,i,a)=>a.indexOf(v)===i);
+      changed=true;
+    }
+
+    if(tmdb?.genre && tmdb.genre!=='Autre' && (!entry.genre || entry.genre==='Autre')){
+      entry.genre=tmdb.genre;
+      changed=true;
+    }
+    if(entry.type==='serie' && tmdb?.seasons && !entry.seasons){
+      entry.seasons=tmdb.seasons;
+      changed=true;
+    }
+    if(entry.type==='film' && tmdb?.runtime && !entry.runtime){
+      entry.runtime=tmdb.runtime;
+      changed=true;
+    }
+  }
+
+  if(changed){
+    await syncCustomsToAllProfiles();
+    renderCatalog();
+  }
+}
+async function deleteCustom(id){
+  if(db&&currentProfile) await db.collection('profiles').doc(currentProfile.id).collection('custom').doc(id).delete();
+  customEntries=customEntries.filter(e=>e.id!==id);
+  delete profileItems[id];
+  if(db&&currentProfile) await db.collection('profiles').doc(currentProfile.id).collection('items').doc(id).delete();
+}
+
+// ══════════════════════════════════════════════════════
+// 🎬 TMDB
+// ══════════════════════════════════════════════════════
+const _cache={};
+async function tmdbFetch(item,forceRefresh=false){
+  const key=item.id;
+  const needsExtra = item.type==='serie' ? 'seasons' : 'runtime';
+  if(!forceRefresh && _cache[key] && _cache[key].genre && _cache[key].genre!=='Autre' && _cache[key].providers?.length && _cache[key][needsExtra]) return _cache[key];
+
+  const ls=localStorage.getItem('tc_'+key);
+  if(!forceRefresh && ls){
+    const cached=JSON.parse(ls);
+    if(cached.genre && cached.genre!=='Autre' && cached.providers?.length && cached[needsExtra]){
+      _cache[key]=cached;
+      return cached;
+    }
+  }
+
+  if(!TMDB_KEY||TMDB_KEY==='VOTRE_CLE_TMDB') return _cache[key]||null;
+  const ep=item.type==='film'?'movie':'tv';
+  const q=encodeURIComponent(item.t);
+
+  try{
+    const r=await fetch(`https://api.themoviedb.org/3/search/${ep}?api_key=${TMDB_KEY}&query=${q}&language=fr-FR&page=1`);
+    const d=await r.json();
+    if(!d.results||!d.results.length) return _cache[key]||null;
+    const res=d.results[0];
+
+    let details={};
+    try{
+      const dr=await fetch(`https://api.themoviedb.org/3/${ep}/${res.id}?api_key=${TMDB_KEY}&language=fr-FR`);
+      details=await dr.json();
+    }catch(e){}
+    const providers=await findProviders(item.t,item.type,ep,res.id,item.y);
+    const data={
+      poster:res.poster_path?TMDB_IMG+'w342'+res.poster_path:null,
+      backdrop:res.backdrop_path?TMDB_IMG+'w1280'+res.backdrop_path:null,
+      overview:res.overview||details.overview||'',
+      genre:getGenreFromIds(item.type,res.genre_ids),
+      providers,
+      seasons:details.number_of_seasons||null,
+      runtime:details.runtime||null,
+      tmdbId:res.id,
+      vote:res.vote_average
+    };
+
+    _cache[key]=data;
+    try{localStorage.setItem('tc_'+key,JSON.stringify(data));}catch(e){}
+    return data;
+  }catch{
+    return _cache[key]||null;
+  }
+}
+async function tmdbSearch(q){
+  if(!TMDB_KEY||TMDB_KEY==='VOTRE_CLE_TMDB') return [];
+  try{
+    const r=await fetch(`https://api.themoviedb.org/3/search/multi?api_key=${TMDB_KEY}&query=${encodeURIComponent(q)}&language=fr-FR&page=1&include_adult=false`);
+    const d=await r.json();
+    return (d.results||[]).filter(x=>x.media_type==='movie'||x.media_type==='tv');
+  }catch{return [];}
+}
+
+// ══════════════════════════════════════════════════════
+// 🖼 PROFILES SCREEN
+// ══════════════════════════════════════════════════════
+function renderProfileScreen(){
+  const g=document.getElementById('p-grid');
+  g.innerHTML='';
+  profiles.forEach(p=>{
+    const d=document.createElement('div');
+    d.className='p-item';
+    d.innerHTML=`<div class="p-avatar" style="background:${p.color}">${p.name[0].toUpperCase()}</div><div class="p-name">${p.name}</div>`;
+    d.onclick=()=>selectProfile(p);
+    g.appendChild(d);
+  });
+  if(profiles.length<6){
+    const a=document.createElement('div');
+    a.className='p-item p-add';
+    a.innerHTML=`<div class="p-avatar">+</div><div class="p-name">Nouveau profil</div>`;
+    a.onclick=()=>{openMgr();setTimeout(()=>document.getElementById('new-p-form').style.display='block',100);};
+    g.appendChild(a);
+  }
+}
+async function selectProfile(p){
+  currentProfile=p;
+  localStorage.setItem('lastPid',p.id);
+  document.getElementById('n-pav').textContent=p.name[0].toUpperCase();
+  document.getElementById('n-pav').style.background=p.color;
+  document.getElementById('n-pname').textContent=p.name;
+  await loadProfileData();
+  document.getElementById('screen-profiles').classList.add('hidden');
+  document.getElementById('screen-main').classList.remove('hidden');
+  renderHero();
+  renderCatalog();
+}
+function switchProfile(){
+  document.getElementById('screen-main').classList.add('hidden');
+  document.getElementById('screen-profiles').classList.remove('hidden');
+  currentProfile=null; profileItems={}; customEntries=[];
+}
+
+// Profile creation
+async function createProfile(){
+  const name=document.getElementById('np-name').value.trim();
+  if(!name){showToast('Entre un nom','err');return;}
+  if(profiles.length>=6){showToast('Max 6 profils','err');return;}
+  const color=selColor||P_COLORS[profiles.length%P_COLORS.length];
+  const data={name,color,createdAt:firebase.firestore.FieldValue.serverTimestamp()};
+  let id='local_'+Date.now();
+  if(db){const ref=await db.collection('profiles').add(data);id=ref.id;}
+  profiles.push({id,name,color});
+  renderProfileScreen();renderMgr();
+  document.getElementById('np-name').value='';
+  document.getElementById('new-p-form').style.display='none';
+  showToast('Profil créé !','ok');
+}
+async function deleteProfile(id){
+  if(!confirm('Supprimer ce profil ?')) return;
+  if(db){
+    const items=await db.collection('profiles').doc(id).collection('items').get();
+    const customs=await db.collection('profiles').doc(id).collection('custom').get();
+    const b=db.batch();
+    [...items.docs,...customs.docs].forEach(d=>b.delete(d.ref));
+    b.delete(db.collection('profiles').doc(id));
+    await b.commit();
+  }
+  profiles=profiles.filter(p=>p.id!==id);
+  renderProfileScreen();renderMgr();
+  showToast('Profil supprimé','ok');
+}
+function buildColorPick(){
+  const cp=document.getElementById('color-pick');
+  cp.innerHTML=P_COLORS.map(c=>`<div style="width:32px;height:32px;border-radius:50%;background:${c};cursor:pointer;border:2px solid transparent" onclick="selColor='${c}';document.querySelectorAll('#color-pick>div').forEach(d=>d.style.borderColor='transparent');this.style.borderColor='#fff'"></div>`).join('');
+  selColor=P_COLORS[profiles.length%P_COLORS.length];
+}
+function openMgr(){document.getElementById('mgr-ov').classList.remove('hidden');renderMgr();}
+function closeMgr(){document.getElementById('mgr-ov').classList.add('hidden');}
+function renderMgr(){
+  document.getElementById('mgr-list').innerHTML=profiles.map(p=>`
+    <div class="mgr-item">
+      <div class="mgr-av" style="background:${p.color}">${p.name[0].toUpperCase()}</div>
+      <div class="mgr-name">${p.name}</div>
+      <button class="mgr-del" onclick="deleteProfile('${p.id}')">✕</button>
+    </div>`).join('');
+}
+
+
+// ══════════════════════════════════════════════════════
+// ✅ STATUTS + SAISONS
+// ══════════════════════════════════════════════════════
+function getItemStatus(id){
+  const u=profileItems[id]||{};
+  if(u.status) return u.status;
+  if(u.seen) return 'seen';
+  return '';
+}
+function statusLabel(s){
+  return {watchlist:'À regarder',watching:'En cours',seen:'Vu'}[s]||'';
+}
+async function setItemStatus(id,status){
+  const data={status};
+  if(status==='seen') data.seen=true;
+  else data.seen=false;
+  await saveItem(id,data);
+  renderCatalog();
+  updateHeroBtn();
+  if(modalItem&&modalItem.id===id) renderStatusControls(modalItem);
+}
+function getSeasonCount(item,tmdb=null){
+  if(item.type!=='serie') return 0;
+  return item.seasons || item.number_of_seasons || tmdb?.seasons || tmdb?.number_of_seasons || 0;
+}
+function formatRuntime(min){
+  if(!min) return '';
+  const h=Math.floor(min/60), m=min%60;
+  return h ? `${h}h${m?String(m).padStart(2,'0'):''}` : `${m} min`;
+}
+async function toggleSeasonSeen(item,seasonNumber,total){
+  const u=profileItems[item.id]||{};
+  const seasonsSeen=new Set(u.seasonsSeen||[]);
+  if(seasonsSeen.has(seasonNumber)) seasonsSeen.delete(seasonNumber);
+  else seasonsSeen.add(seasonNumber);
+
+  const arr=[...seasonsSeen].sort((a,b)=>a-b);
+  const data={seasonsSeen:arr};
+
+  if(total && arr.length>=total){
+    data.status='seen';
+    data.seen=true;
+  } else if(arr.length>0){
+    data.status='watching';
+    data.seen=false;
+  }
+
+  await saveItem(item.id,data);
+  renderStatusControls(item);
+  renderCatalog();
+  updateHeroBtn();
+}
+function renderStatusControls(item,tmdb=null){
+  const tabs=document.getElementById('m-status-tabs');
+  if(!tabs||!item) return;
+  const current=getItemStatus(item.id);
+
+  tabs.innerHTML=[
+    ['watchlist','À regarder'],
+    ['watching','En cours'],
+    ['seen','Vu']
+  ].map(([key,label])=>`<button class="status-btn ${current===key?'active':''}" onclick="setItemStatus('${item.id}','${key}')">${label}</button>`).join('');
+
+  const total=getSeasonCount(item,tmdb);
+  if(item.type==='serie' && total && !item.seasons){
+    item.seasons=total;
+    if(item.custom) saveCustom(item);
+  }
+  const wrap=document.getElementById('m-seasons-wrap');
+  const box=document.getElementById('m-seasons');
+
+  if(item.type==='serie' && total>0 && wrap && box){
+    wrap.style.display='block';
+    const seen=new Set((profileItems[item.id]||{}).seasonsSeen||[]);
+    box.innerHTML=`<span class="m-tag" style="align-self:center">${total} saison${total>1?'s':''} au total</span>`;
+    for(let i=1;i<=total;i++){
+      const b=document.createElement('button');
+      b.className='season-pill'+(seen.has(i)?' done':'');
+      b.textContent='Saison '+i;
+      b.onclick=()=>toggleSeasonSeen(item,i,total);
+      box.appendChild(b);
+    }
+  } else if(wrap) {
+    wrap.style.display='none';
+  }
+}
+
+// ══════════════════════════════════════════════════════
+// 🏠 HERO
+// ══════════════════════════════════════════════════════
+async function renderHero(){
+  const id=HERO_IDS[Math.floor(Math.random()*HERO_IDS.length)];
+  heroItem=CATALOG.find(c=>c.id===id)||CATALOG[0];
+  document.getElementById('h-type').textContent=heroItem.type==='film'?'🎬 Film':'📺 Série';
+  document.getElementById('h-title').textContent=heroItem.t;
+  const imdbEl=document.getElementById('h-imdb');
+  if(heroItem.imdb){imdbEl.textContent='⭐ '+heroItem.imdb;imdbEl.style.display='inline';}else{imdbEl.style.display='none';}
+  document.getElementById('h-genre').textContent=heroItem.genre;
+  document.getElementById('h-year').textContent=heroItem.y||'';
+  updateHeroBtn();
+  const tmdb=await tmdbFetch(heroItem);
+  if(tmdb){
+    document.getElementById('h-desc').textContent=tmdb.overview||'';
+    if(tmdb.backdrop) document.getElementById('hero-bg').style.backgroundImage=`url('${tmdb.backdrop}')`;
+  }
+}
+function updateHeroBtn(){
+  if(!heroItem) return;
+  const seen=!!profileItems[heroItem.id]?.seen;
+  const btn=document.getElementById('h-seen-btn');
+  btn.textContent=seen?'✓ Déjà vu':'+ Marquer vu';
+  btn.style.background=seen?'#2a6b3a':'rgba(109,109,110,.65)';
+}
+async function heroToggleSeen(){
+  if(!heroItem) return;
+  const seen=!profileItems[heroItem.id]?.seen;
+  await saveItem(heroItem.id,{seen,status:seen?'seen':''});
+  updateHeroBtn();
+  renderCatalog();
+  showToast(seen?'✓ Marqué comme vu':'◯ Retiré des vus','ok');
+}
+function heroDetail(){if(heroItem) openModal(heroItem);}
+
+// ══════════════════════════════════════════════════════
+// 📋 CATALOG
+// ══════════════════════════════════════════════════════
+function allItems(){return[...CATALOG,...customEntries.map(e=>({...e,custom:true}))];}
+function normalizeTitleForDuplicate(s){
+  return (s||'')
+    .toLowerCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g,'')
+    .replace(/^(le|la|les|the|a|an)\s+/,'')
+    .replace(/[^a-z0-9]/g,'');
+}
+function getKnownTitleAliases(item){
+  return [
+    item.t,
+    item.originalTitle,
+    item.name,
+    item.title
+  ].filter(Boolean).map(normalizeTitleForDuplicate);
+}
+function hasSameTmdbId(item,r){
+  if(!item||!r) return false;
+  return item.tmdbId && r.id && String(item.tmdbId)===String(r.id);
+}
+function isDuplicateTitle(title,type,tmdbResult=null){
+  const key=normalizeTitleForDuplicate(title);
+  return allItems().some(i=>{
+    if(tmdbResult && hasSameTmdbId(i,tmdbResult)) return true;
+
+    const aliases=getKnownTitleAliases(i);
+    const sameTitle=aliases.some(a=>a===key);
+    const looseTitle=aliases.some(a=>a && key && (a.includes(key)||key.includes(a)));
+
+    return (sameTitle || looseTitle) && (!type || i.type===type);
+  });
+}
+function setCatalogFilter(f,el){
+  catFilter=f;
+  document.querySelectorAll('.n-links a').forEach(a=>a.classList.remove('active'));
+  if(el) el.classList.add('active');
+  renderCatalog();
+}
+function genreEmoji(g){return{
+  Crime:'🔫',Thriller:'🔪',Espionnage:'🕵️',Guerre:'🪖',Militaire:'⚔️','Sci-Fi':'🚀',Drame:'🎭',
+  Action:'💥',Comédie:'😄',Horreur:'👻',Animation:'🎨',Aventure:'🧭',Documentaire:'📚',Famille:'👨‍👩‍👧',
+  Fantastique:'🧙',Historique:'🏛️',Mystère:'❓',Romance:'💕',Western:'🤠','Action & Aventure':'💥',
+  'Sci-Fi & Fantastique':'🚀','Guerre & Politique':'🪖',Autre:'🎬'
+}[g]||'🎬';}
+
+function renderCatalog(){
+  const all=allItems();
+  let items=all;
+  if(catFilter==='film') items=all.filter(i=>i.type==='film');
+  else if(catFilter==='serie') items=all.filter(i=>i.type==='serie');
+  else if(catFilter==='watchlist') items=all.filter(i=>getItemStatus(i.id)==='watchlist');
+  else if(catFilter==='watching') items=all.filter(i=>getItemStatus(i.id)==='watching');
+  else if(catFilter==='seen') items=all.filter(i=>getItemStatus(i.id)==='seen'||profileItems[i.id]?.seen);
+  else if(catFilter==='rated') items=all.filter(i=>profileItems[i.id]?.myRating>0);
+
+  const cat=document.getElementById('catalog');
+  cat.innerHTML='';
+
+  // Statuts
+  const watchlist=items.filter(i=>getItemStatus(i.id)==='watchlist');
+  const watching=items.filter(i=>getItemStatus(i.id)==='watching');
+  const seen=items.filter(i=>getItemStatus(i.id)==='seen'||profileItems[i.id]?.seen);
+  if(watchlist.length) addRow('📌 À regarder',watchlist,cat);
+  if(watching.length) addRow('▶️ En cours',watching,cat);
+  if(seen.length) addRow('✓ Vus',seen,cat);
+
+  // Top notés
+  if(catFilter!=='seen'&&catFilter!=='rated'){
+    const top=items.filter(i=>i.imdb>=9).sort((a,b)=>b.imdb-a.imdb);
+    if(top.length) addRow('⭐ Les mieux notés (IMDB 9+)',top,cat);
+  }
+
+  // Par genre : genres fixes + genres ajoutés automatiquement depuis TMDB ou les ajouts manuels
+  const baseGenres=['Crime','Thriller','Espionnage','Guerre','Militaire','Sci-Fi','Drame','Action','Comédie','Horreur','Animation'];
+  const dynamicGenres=[...new Set(items.map(i=>i.genre).filter(Boolean))];
+  const genres=[...baseGenres,...dynamicGenres.filter(g=>!baseGenres.includes(g)&&g!=='Autre'),'Autre'];
+  genres.forEach(g=>{
+    const gi=items.filter(i=>i.genre===g).sort((a,b)=>(b.imdb||0)-(a.imdb||0));
+    if(gi.length) addRow(genreEmoji(g)+' '+g,gi,cat);
+  });
+
+  if(!cat.children.length) cat.innerHTML='<div class="row-empty" style="padding:3rem 4%;font-size:1rem">Aucun contenu dans cette catégorie.</div>';
+}
+
+function addRow(title,items,container){
+  const row=document.createElement('div');
+  row.className='row';
+
+  const wrap=document.createElement('div');
+  wrap.className='row-wrap';
+
+  const prev=document.createElement('button');
+  prev.className='row-nav row-prev';
+  prev.innerHTML='❮';
+
+  const next=document.createElement('button');
+  next.className='row-nav row-next';
+  next.innerHTML='❯';
+
+  const scroller=document.createElement('div');
+  scroller.className='row-scroller';
+
+  prev.onclick=()=>scroller.scrollBy({left:-900,behavior:"smooth"});
+  next.onclick=()=>scroller.scrollBy({left:900,behavior:"smooth"});
+
+  items.forEach(item=>{
+    const card=makeCard(item);
+    scroller.appendChild(card);
+  });
+
+  row.innerHTML=`<div class="row-title">${title}</div>`;
+  wrap.appendChild(prev);
+  wrap.appendChild(scroller);
+  wrap.appendChild(next);
+  row.appendChild(wrap);
+  container.appendChild(row);
+
+  requestAnimationFrame(()=>loadPosters(scroller,items));
+}
+
+async function loadPosters(scroller,items){
+  for(const item of items){
+    const card=scroller.querySelector(`[data-id="${item.id}"]`);
+    if(!card) continue;
+    const tmdb=await tmdbFetch(item);
+    if(tmdb?.poster){
+      const img=card.querySelector('.card-img');
+      const ph=card.querySelector('.card-ph');
+      if(img){img.src=tmdb.poster;img.style.display='block';}
+      if(ph) ph.style.display='none';
+    }
+  }
+}
+
+function makeCard(item){
+  const u=profileItems[item.id]||{};
+  const isSeen=!!u.seen;
+  const stars=u.myRating||0;
+  const div=document.createElement('div');
+  div.className='card'; div.dataset.id=item.id;
+  div.innerHTML=`
+    ${isSeen?'<div class="card-seen-dot">✓</div>':''}
+    ${item.type==='serie'&&item.seasons?`<div class="card-season">${item.seasons} saison${item.seasons>1?'s':''}</div>`:''}
+    <img class="card-img" src="" alt="${item.t}" style="display:none" onerror="this.style.display='none'">
+    <div class="card-ph"><div class="card-ph-t">${item.t}</div></div>
+    <div class="card-ov">
+      <div class="card-ov-title">${item.t}</div>
+      <div class="card-ov-meta">
+        ${item.imdb?`<span class="card-imdb">⭐${item.imdb}</span>`:''}
+        <span class="card-tag">${item.genre||''} ${item.y?'· '+item.y:''}</span>
+      </div>
+      ${getItemStatus(item.id)?`<div class="card-tag" style="margin-bottom:5px">● ${statusLabel(getItemStatus(item.id))}</div>`:''}
+      ${stars?`<div class="card-myrating">${'★'.repeat(stars)}${'☆'.repeat(5-stars)}</div>`:''}
+      <div class="card-btns">
+        <button class="c-btn c-btn-seen${isSeen?' done':''}" title="${isSeen?'Retiré des vus':'Marquer vu'}" onclick="event.stopPropagation();quickToggleSeen('${item.id}')">${isSeen?'✓':'+'}</button>
+        <button class="c-btn c-btn-info" title="Détails" onclick="event.stopPropagation();openModalById('${item.id}')">ℹ</button>
+      </div>
+    </div>`;
+  div.onclick=()=>openModalById(item.id);
+  return div;
+}
+
+async function quickToggleSeen(id){
+  const seen=!profileItems[id]?.seen;
+  await saveItem(id,{seen,status:seen?'seen':''});
+  document.querySelectorAll(`[data-id="${id}"]`).forEach(card=>{
+    const btn=card.querySelector('.c-btn-seen');
+    if(btn){btn.classList.toggle('done',seen);btn.textContent=seen?'✓':'+';}
+    let dot=card.querySelector('.card-seen-dot');
+    if(seen&&!dot){dot=document.createElement('div');dot.className='card-seen-dot';dot.textContent='✓';card.insertBefore(dot,card.firstChild);}
+    else if(!seen&&dot) dot.remove();
+  });
+  updateHeroBtn();
+  showToast(seen?'✓ Marqué comme vu':'◯ Retiré des vus','ok');
+}
+
+// ══════════════════════════════════════════════════════
+// 🔍 SEARCH
+// ══════════════════════════════════════════════════════
+
+async function searchTmdbExact(title,type){
+  if(!TMDB_KEY||TMDB_KEY==='VOTRE_CLE_TMDB') return null;
+  const ep=type==='film'?'movie':'tv';
+  try{
+    const r=await fetch(`https://api.themoviedb.org/3/search/${ep}?api_key=${TMDB_KEY}&query=${encodeURIComponent(title)}&language=fr-FR&page=1&include_adult=false`);
+    const d=await r.json();
+    return (d.results||[])[0] ? {...d.results[0],media_type:type==='film'?'movie':'tv'} : null;
+  }catch{return null;}
+}
+
+
+async function tmdbDiscover(mediaType='tv',genre=null,page=null){
+  if(!TMDB_KEY||TMDB_KEY==='VOTRE_CLE_TMDB') return [];
+  const p=page||Math.floor(Math.random()*8)+1;
+  const genreParam=genre?`&with_genres=${genre}`:'';
+  const sortOptions=['popularity.desc','vote_average.desc','first_air_date.desc'];
+  const sort=sortOptions[Math.floor(Math.random()*sortOptions.length)];
+  const voteParam=sort==='vote_average.desc'?'&vote_count.gte=150':'&vote_count.gte=30';
+  const dateParam=mediaType==='tv'?'&first_air_date.gte=2000-01-01':'&primary_release_date.gte=1980-01-01';
+
+  try{
+    const r=await fetch(`https://api.themoviedb.org/3/discover/${mediaType}?api_key=${TMDB_KEY}&language=fr-FR&sort_by=${sort}${genreParam}${voteParam}${dateParam}&page=${p}&include_adult=false`);
+    const d=await r.json();
+    return (d.results||[]).map(x=>({...x,media_type:mediaType==='movie'?'movie':'tv'}));
+  }catch{
+    return [];
+  }
+}
+
+async function getDynamicSuggestionPool(forYou=false){
+  const topGenres=getTopRatedGenres();
+  const wantedGenres=forYou && topGenres.length ? topGenres : ['Crime','Thriller','Espionnage','Action','Drame','Guerre','Sci-Fi'];
+
+  const batches=[];
+  for(const g of shuffleArray(wantedGenres).slice(0,4)){
+    const tvGenre=APP_GENRE_TO_TMDB_TV[g]||null;
+    const movieGenre=APP_GENRE_TO_TMDB_MOVIE[g]||null;
+    batches.push(...await tmdbDiscover('tv',tvGenre));
+    batches.push(...await tmdbDiscover('movie',movieGenre));
+  }
+
+  batches.push(...await tmdbDiscover('tv',null));
+  batches.push(...await tmdbDiscover('movie',null));
+
+  const unique=new Map();
+  for(const r of shuffleArray(batches)){
+    const type=r.media_type==='movie'?'film':'serie';
+    const title=r.title||r.name||'';
+    const key=`${r.media_type}_${r.id}`;
+    if(!title) continue;
+    if(SEEN_SUGGESTION_IDS.has(key)) continue;
+    if(isDuplicateTitle(title,type,r)) continue;
+    unique.set(key,r);
+  }
+
+  return [...unique.values()];
+}
+
+function getTopRatedGenres(){
+  const scores={};
+  allItems().forEach(i=>{
+    const r=profileItems[i.id]?.myRating||0;
+    if(r>0 && i.genre){
+      if(!scores[i.genre]) scores[i.genre]={sum:0,count:0};
+      scores[i.genre].sum+=r;
+      scores[i.genre].count++;
+    }
+  });
+  return Object.entries(scores)
+    .map(([genre,v])=>({genre,score:v.sum/v.count,count:v.count}))
+    .sort((a,b)=>(b.score-b.count/100)-(a.score-a.count/100))
+    .slice(0,3)
+    .map(x=>x.genre);
+}
+
+function reindexSuggestionGrid(gridId,storeName){
+  const grid=document.getElementById(gridId);
+  if(!grid) return;
+  [...grid.children].forEach((card,i)=>{
+    card.dataset.idx=i;
+    card.dataset.store=storeName;
+  });
+}
+
+async function fillSuggestionRow(gridId,items,targetStoreName,max=30){
+  const grid=document.getElementById(gridId);
+  if(!grid) return [];
+  grid.innerHTML='';
+  const results=[];
+
+  const dynamicPool=await getDynamicSuggestionPool(targetStoreName==='forYouResults');
+  const fallbackPool=shuffleArray(items.filter(s=>!isDuplicateTitle(s.t,s.type)));
+  const prepared=[];
+
+  for(const r of dynamicPool){
+    prepared.push(r);
+  }
+
+  // Secours : ancienne liste fixe si TMDB Discover ne renvoie pas assez.
+  for(const sug of fallbackPool){
+    const r=await searchTmdbExact(sug.t,sug.type);
+    if(!r) continue;
+    const title=r.title||r.name||sug.t;
+    const type=r.media_type==='movie'?'film':'serie';
+    const key=`${r.media_type}_${r.id}`;
+    if(SEEN_SUGGESTION_IDS.has(key)) continue;
+    if(isDuplicateTitle(title,type,r)) continue;
+    prepared.push(r);
+  }
+
+  if(targetStoreName==='forYouResults'){
+    shuffledForYou=prepared;
+    forYouQueueIndex=0;
+  } else {
+    shuffledSuggestions=prepared;
+    suggestionQueueIndex=0;
+  }
+
+  while(results.length<max){
+    const r=await getNextSuggestionResult(targetStoreName);
+    if(!r) break;
+    results.push(r);
+    grid.appendChild(makeSuggestionCard(r,results.length-1,targetStoreName));
+  }
+
+  reindexSuggestionGrid(gridId,targetStoreName);
+  return results;
+}
+
+async function getNextSuggestionResult(storeName='suggestionResults'){
+  const isForYou=storeName==='forYouResults';
+  const pool=isForYou?shuffledForYou:shuffledSuggestions;
+
+  while((isForYou?forYouQueueIndex:suggestionQueueIndex)<pool.length){
+    const idx=isForYou?forYouQueueIndex++:suggestionQueueIndex++;
+    const r=pool[idx];
+    if(!r) continue;
+
+    const title=r.title||r.name||'';
+    const type=r.media_type==='movie'?'film':'serie';
+    const key=`${r.media_type}_${r.id}`;
+
+    if(SEEN_SUGGESTION_IDS.has(key)) continue;
+    if(isDuplicateTitle(title,type,r)) continue;
+
+    SEEN_SUGGESTION_IDS.add(key);
+    return r;
+  }
+
+  // Recharge dynamique si la file est vide.
+  const extra=await getDynamicSuggestionPool(isForYou);
+  if(extra.length){
+    if(isForYou){
+      shuffledForYou.push(...extra);
+    } else {
+      shuffledSuggestions.push(...extra);
+    }
+    return await getNextSuggestionResult(storeName);
+  }
+
+  return null;
+}
+
+async function appendNextSuggestion(storeName='suggestionResults'){
+  const grid=document.getElementById(storeName==='forYouResults'?'s-for-you':'s-suggestions');
+  if(!grid) return;
+
+  const r=await getNextSuggestionResult(storeName);
+  if(!r) return;
+
+  const list=storeName==='forYouResults'?forYouResults:suggestionResults;
+  list.push(r);
+  grid.appendChild(makeSuggestionCard(r,list.length-1,storeName));
+  reindexSuggestionGrid(storeName==='forYouResults'?'s-for-you':'s-suggestions',storeName);
+}
+
+async function loadSuggestions(){
+  const wrap=document.getElementById('s-suggestions-wrap');
+  const grid=document.getElementById('s-suggestions');
+  const fyWrap=document.getElementById('s-for-you-wrap');
+
+  if(!wrap||!grid) return;
+
+  const topGenres=getTopRatedGenres();
+  const forYouPool=topGenres.length
+    ? SUGGESTIONS.filter(s=>topGenres.includes(s.genre))
+    : [];
+
+  forYouResults=await fillSuggestionRow('s-for-you',forYouPool,'forYouResults',18);
+  if(fyWrap) fyWrap.style.display=forYouResults.length?'block':'none';
+
+  const broadPool=SUGGESTIONS.filter(s=>!forYouPool.some(f=>f.t===s.t));
+  suggestionResults=await fillSuggestionRow('s-suggestions',broadPool,'suggestionResults',28);
+
+  wrap.style.display=suggestionResults.length?'block':'none';
+}
+
+function makeSuggestionCard(r,idx,storeName='suggestionResults'){
+  const title=r.title||r.name||'';
+  const type=r.media_type==='movie'?'film':'serie';
+  const year=(r.release_date||r.first_air_date||'').slice(0,4);
+  const poster=r.poster_path?TMDB_IMG+'w342'+r.poster_path:null;
+  const div=document.createElement('div');
+  div.className='card suggestion-card';
+  div.dataset.store=storeName;
+  div.dataset.idx=idx;
+
+  div.innerHTML=`
+    ${poster?`<img class="card-img" src="${poster}" alt="${title}">`:`<div class="card-ph"><div class="card-ph-t">${title}</div></div>`}
+    <div class="card-ov">
+      <div class="card-ov-title">${title}</div>
+      <div class="card-ov-meta"><span class="card-tag">${type==='film'?'Film':'Série'} ${year?'· '+year:''}</span>${r.vote_average?`<span class="card-imdb">TMDB ${r.vote_average.toFixed(1)}</span>`:''}</div>
+      <div class="card-btns"><button type="button" class="c-btn c-btn-seen suggestion-add-btn" style="border-color:#4a9eff;color:#4a9eff" title="Ajouter">+</button></div>
+    </div>`;
+
+  // Empêche l'ouverture de la fiche en cliquant sur la carte de suggestion.
+  div.onclick=e=>{e.preventDefault();e.stopPropagation();};
+
+  const btn=div.querySelector('.suggestion-add-btn');
+  btn.onclick=e=>{
+    e.preventDefault();
+    e.stopPropagation();
+    const card=e.currentTarget.closest('.suggestion-card');
+    addSuggestionEntry(parseInt(card.dataset.idx,10),card.dataset.store);
+  };
+
+  return div;
+}
+
+async function addSuggestionEntry(idx,storeName='suggestionResults'){
+  const list=storeName==='forYouResults'?forYouResults:suggestionResults;
+  const r=list[idx];
+  if(!r) return;
+
+  const title=r.title||r.name||'';
+  const type=r.media_type==='movie'?'film':'serie';
+
+  if(isDuplicateTitle(title,type,r)){
+    showToast((type==='film'?'Film':'Série')+' déjà ajouté dans CinéHome','info');
+    await loadSuggestions();
+    return;
+  }
+
+  tmdbResults=[r];
+  const added=await addTmdbEntry(0,{openAfterAdd:false,keepSearchOpen:true});
+  if(!added) {
+    await loadSuggestions();
+    return;
+  }
+
+  const grid=document.getElementById(storeName==='forYouResults'?'s-for-you':'s-suggestions');
+  if(grid && grid.children[idx]) grid.children[idx].remove();
+  list.splice(idx,1);
+
+  reindexSuggestionGrid(storeName==='forYouResults'?'s-for-you':'s-suggestions',storeName);
+  await appendNextSuggestion(storeName);
+}
+
+function openSearch(){
+  document.getElementById('search-overlay').classList.remove('hidden');
+  const inp=document.getElementById('s-input');
+  inp.value=''; inp.focus();
+  inp.oninput=e=>{clearTimeout(searchTimer);searchTimer=setTimeout(()=>doSearch(e.target.value),350);};
+  document.getElementById('s-local-wrap').style.display='none';
+  document.getElementById('s-tmdb-wrap').style.display='none';
+  document.getElementById('s-empty').classList.add('hidden');
+  document.getElementById('s-manual-btn').style.display='none';
+  loadSuggestions();
+}
+function closeSearch(){
+  document.getElementById('search-overlay').classList.add('hidden');
+  document.getElementById('s-input').value='';
+}
+async function doSearch(q){
+  if(!q||q.length<2){
+    document.getElementById('s-local-wrap').style.display='none';
+    document.getElementById('s-tmdb-wrap').style.display='none';
+    document.getElementById('s-empty').classList.add('hidden');
+    document.getElementById('s-manual-btn').style.display='none';
+    document.getElementById('s-suggestions-wrap').style.display='block';
+    document.getElementById('s-for-you-wrap').style.display='block';
+    loadSuggestions();
+    return;
+  }
+  document.getElementById('s-suggestions-wrap').style.display='none';
+  document.getElementById('s-for-you-wrap').style.display='none';
+  const ql=q.toLowerCase();
+  // Local search
+  const local=allItems().filter(i=>i.t.toLowerCase().includes(ql)||i.genre?.toLowerCase().includes(ql));
+  const sg=document.getElementById('s-local');
+  sg.innerHTML='';
+  local.forEach(item=>{
+    const d=makeSearchCardLocal(item);
+    sg.appendChild(d);
+  });
+  document.getElementById('s-local-wrap').style.display=local.length?'block':'none';
+
+  // TMDB search
+  tmdbResults=await tmdbSearch(q);
+  const tg=document.getElementById('s-tmdb');
+  tg.innerHTML='';
+  const filtered=tmdbResults.filter(r=>{
+    const title=r.title||r.name||'';
+    const type=r.media_type==='movie'?'film':'serie';
+    return title&&!isDuplicateTitle(title,type,r);
+  }).slice(0,15);
+  filtered.forEach((r,i)=>tg.appendChild(makeSearchCardTmdb(r,i)));
+  document.getElementById('s-tmdb-wrap').style.display=filtered.length?'block':'none';
+
+  const empty=!local.length&&!filtered.length;
+  document.getElementById('s-empty').classList.toggle('hidden',!empty);
+  document.getElementById('s-manual-btn').style.display='block';
+}
+
+function makeSearchCardLocal(item){
+  const div=document.createElement('div');
+  div.className='card';
+  div.innerHTML=`
+    <img class="card-img" src="" alt="${item.t}" style="display:none" onerror="this.style.display='none'">
+    <div class="card-ph"><div class="card-ph-t">${item.t}<br><span style="font-size:9px;color:#888">${item.y||''} · ${item.genre}</span></div></div>
+    <div class="card-ov">
+      <div class="card-ov-title">${item.t}</div>
+      <div class="card-ov-meta">${item.imdb?`<span class="card-imdb">⭐${item.imdb}</span>`:''}<span class="card-tag">${item.type==='film'?'Film':'Série'}</span></div>
+      <div class="card-btns"><button class="c-btn c-btn-info" onclick="event.stopPropagation();closeSearch();openModalById('${item.id}')">ℹ</button></div>
+    </div>`;
+  div.onclick=()=>{closeSearch();openModalById(item.id);};
+  tmdbFetch(item).then(td=>{
+    if(td?.poster){
+      const img=div.querySelector('.card-img'); if(img){img.src=td.poster;img.style.display='block';}
+      const ph=div.querySelector('.card-ph'); if(ph) ph.style.display='none';
+    }
+  });
+  return div;
+}
+
+function makeSearchCardTmdb(r,idx){
+  const title=r.title||r.name||'';
+  const type=r.media_type==='movie'?'film':'serie';
+  const year=(r.release_date||r.first_air_date||'').slice(0,4);
+  const poster=r.poster_path?TMDB_IMG+'w342'+r.poster_path:null;
+  const div=document.createElement('div');
+  div.className='card';
+  div.innerHTML=`
+    ${poster?`<img class="card-img" src="${poster}" alt="${title}">`:`<div class="card-ph"><div class="card-ph-t">${title}</div></div>`}
+    <div class="card-ov">
+      <div class="card-ov-title">${title}</div>
+      <div class="card-ov-meta"><span class="card-tag">${type==='film'?'Film':'Série'} ${year?'· '+year:''}</span>${r.vote_average?`<span class="card-imdb">TMDB ${r.vote_average.toFixed(1)}</span>`:''}</div>
+      <div class="card-btns"><button class="c-btn c-btn-seen" style="border-color:#4a9eff;color:#4a9eff" title="Ajouter">+</button></div>
+    </div>`;
+  div.onclick=()=>addTmdbEntry(idx);
+  div.querySelector('.c-btn').onclick=e=>{e.stopPropagation();addTmdbEntry(idx);};
+  return div;
+}
+
+async function addTmdbEntry(idx,opts={}){
+  const r=tmdbResults[idx];if(!r) return;
+  const title=r.title||r.name||'';
+  const type=r.media_type==='movie'?'film':'serie';
+  if(isDuplicateTitle(title,type,r)){
+    showToast((type==='film'?'Film':'Série')+' déjà ajouté dans CinéHome','info');
+    return false;
+  }
+  const year=parseInt((r.release_date||r.first_air_date||'').slice(0,4))||null;
+  const id='cx_'+r.id+'_'+Date.now();
+  const entry={id,t:title,type,genre:getTmdbGenre(r),y:year,imdb:null,plt:[],custom:true,tmdbId:r.id,tmdbType:r.media_type,originalTitle:r.original_title||r.original_name||title};
+  // Cache TMDB
+  const ep=type==='film'?'movie':'tv';
+  let details={};
+  try{
+    const dr=await fetch(`https://api.themoviedb.org/3/${ep}/${r.id}?api_key=${TMDB_KEY}&language=fr-FR`);
+    details=await dr.json();
+  }catch(e){}
+  const providers=await findProviders(title,type,ep,r.id,year);
+  if(type==='serie' && details.number_of_seasons) entry.seasons=details.number_of_seasons;
+  if(type==='film' && details.runtime) entry.runtime=details.runtime;
+  const td={
+    poster:r.poster_path?TMDB_IMG+'w342'+r.poster_path:null,
+    backdrop:r.backdrop_path?TMDB_IMG+'w1280'+r.backdrop_path:null,
+    overview:r.overview||'',genre:getTmdbGenre(r),providers,seasons:details.number_of_seasons||null,runtime:details.runtime||null,tmdbId:r.id,vote:r.vote_average
+  };
+  entry.plt=providers.map(providerToPlatformKey).filter((v,i,a)=>a.indexOf(v)===i);
+  _cache[id]=td;
+  try{localStorage.setItem('tc_'+id,JSON.stringify(td));}catch(e){}
+  await saveCustom(entry);
+  renderCatalog();
+  showToast(`"${title}" ajouté !`,'ok');
+
+  if(!opts.keepSearchOpen) closeSearch();
+  if(opts.openAfterAdd!==false) setTimeout(()=>openModal(entry),400);
+
+  return true;
+}
+
+// ══════════════════════════════════════════════════════
+// 🎯 MODAL
+// ══════════════════════════════════════════════════════
+function openModalById(id){const item=allItems().find(i=>i.id===id);if(item) openModal(item);}
+async function openModal(item){
+  modalItem=item;
+  const u=profileItems[item.id]||{};
+  currentRating=u.myRating||0;
+  document.getElementById('modal-ov').classList.remove('hidden');
+  document.body.style.overflow='hidden';
+  document.getElementById('m-title').textContent=item.t;
+  // Meta
+  const meta=document.getElementById('m-meta');
+  meta.innerHTML=`
+    ${item.imdb?`<span class="m-imdb">⭐ ${item.imdb}</span>`:''}
+    <span class="m-tag">${item.type==='film'?'Film':'Série'}</span>
+    ${item.genre?`<span class="m-tag">${item.genre}</span>`:''}
+    ${item.y?`<span class="m-tag">${item.y}</span>`:''}
+    ${item.type==='serie'&&item.seasons?`<span class="m-tag">${item.seasons} saison${item.seasons>1?'s':''}</span>`:''}
+    ${item.type==='film'&&item.runtime?`<span class="m-tag">${formatRuntime(item.runtime)}</span>`:''}`;
+  // Platforms
+  document.getElementById('m-plts').innerHTML=(item.plt||[]).map(p=>`<span class="m-plt plt-${p}">${PLT_LBL[p]||p}</span>`).join('');
+  // Stars
+  renderMStars(currentRating);
+  // Note
+  document.getElementById('m-note').value=u.myNote||'';
+  // Seen btn
+  updateMSeenBtn(!!u.seen);
+  renderStatusControls(item);
+  // Delete btn
+  document.getElementById('m-del-btn').style.display=item.custom?'flex':'none';
+  // TMDB data
+  const tmdb=await tmdbFetch(item);
+  renderStatusControls(item,tmdb);
+  if(tmdb){
+    const extraMeta = item.type==='serie' && (item.seasons||tmdb.seasons)
+      ? `<span class="m-tag">${item.seasons||tmdb.seasons} saison${(item.seasons||tmdb.seasons)>1?'s':''}</span>`
+      : item.type==='film' && (item.runtime||tmdb.runtime)
+        ? `<span class="m-tag">${formatRuntime(item.runtime||tmdb.runtime)}</span>`
+        : '';
+    if(extraMeta && !document.getElementById('m-meta').innerHTML.includes(extraMeta)){
+      document.getElementById('m-meta').insertAdjacentHTML('beforeend',extraMeta);
+    }
+  }
+  if(tmdb?.providers?.length){
+    document.getElementById('m-plts').innerHTML=tmdb.providers.map(name=>{
+      const key=providerToPlatformKey(name);
+      return `<span class="m-plt plt-${key}">${name}</span>`;
+    }).join('');
+  } else if(!(item.plt||[]).length) {
+    const q=encodeURIComponent(item.t+' streaming France');
+    document.getElementById('m-plts').innerHTML=`<a class="m-tag" style="text-decoration:none;color:#fff" target="_blank" href="https://www.google.com/search?q=${q}">🔎 Chercher une plateforme</a>`;
+  }
+  document.getElementById('m-back').style.backgroundImage=tmdb?.backdrop?`url('${tmdb.backdrop}')`:'linear-gradient(135deg,#1a1a3e,#0f0f0f)';
+  document.getElementById('m-poster-wrap').innerHTML=tmdb?.poster?`<img class="m-poster" src="${tmdb.poster}" alt="${item.t}" onerror="this.style.display='none'">`:`<div class="m-poster-ph"></div>`;
+  const overview=u.myNote||tmdb?.overview||'';
+  document.getElementById('m-overview').textContent=overview;
+  // TMDB rating fallback
+  if(!item.imdb&&tmdb?.vote){
+    meta.insertAdjacentHTML('afterbegin',`<span class="m-imdb" style="background:#aaa">TMDB ${tmdb.vote.toFixed(1)}</span>`);
+  }
+}
+function closeModal(){
+  document.getElementById('modal-ov').classList.add('hidden');
+  document.body.style.overflow='';
+  modalItem=null;
+}
+function renderMStars(n){
+  document.getElementById('m-stars').innerHTML=[1,2,3,4,5].map(v=>`<span class="m-star${n>=v?' lit':''}" onclick="setMStar(${v})">★</span>`).join('');
+}
+function setMStar(v){currentRating=currentRating===v?0:v;renderMStars(currentRating);}
+function updateMSeenBtn(seen){
+  const b=document.getElementById('m-seen-btn');
+  b.textContent=seen?'✓ Déjà vu':'◯ Marquer vu';
+  b.className='m-btn m-btn-seen'+(seen?' done':'');
+}
+async function modalToggleSeen(){
+  if(!modalItem) return;
+  const seen=!profileItems[modalItem.id]?.seen;
+  await saveItem(modalItem.id,{seen,status:seen?'seen':''});
+  updateMSeenBtn(seen);
+  renderCatalog();
+  updateHeroBtn();
+  showToast(seen?'✓ Marqué comme vu':'◯ Retiré des vus','ok');
+}
+async function modalSave(){
+  if(!modalItem) return;
+  const note=document.getElementById('m-note').value;
+  await saveItem(modalItem.id,{myRating:currentRating,myNote:note});
+  // Update stars on cards
+  document.querySelectorAll(`[data-id="${modalItem.id}"] .card-myrating`).forEach(el=>{
+    el.textContent=currentRating?'★'.repeat(currentRating)+'☆'.repeat(5-currentRating):'';
+  });
+  showToast('Sauvegardé !','ok');
+}
+async function modalDelete(){
+  if(!modalItem||!modalItem.custom) return;
+  if(!confirm('Retirer ce titre ?')) return;
+  await deleteCustom(modalItem.id);
+  closeModal();renderCatalog();
+  showToast('Titre retiré','ok');
+}
+
+// ══════════════════════════════════════════════════════
+// ➕ ADD MANUAL
+// ══════════════════════════════════════════════════════
+function openAddManual(){
+  document.getElementById('add-ov').classList.remove('hidden');
+  const sel=document.getElementById('af-g');
+  const inp=document.getElementById('af-g-new');
+  if(sel&&inp){
+    inp.style.display=sel.value==='__new__'?'block':'none';
+    sel.onchange=()=>{inp.style.display=sel.value==='__new__'?'block':'none';if(sel.value==='__new__')inp.focus();};
+  }
+}
+function closeAddManual(){document.getElementById('add-ov').classList.add('hidden');}
+async function saveManualEntry(){
+  const t=document.getElementById('af-t').value.trim();
+  if(!t){showToast('Le titre est obligatoire','err');return;}
+  const type=document.getElementById('af-type').value;
+  if(isDuplicateTitle(t,type)){
+    showToast((type==='film'?'Film':'Série')+' déjà ajouté dans CinéHome','info');
+    return;
+  }
+  const y=parseInt(document.getElementById('af-y').value)||null;
+  let genre=document.getElementById('af-g').value;
+  if(genre==='__new__'){
+    genre=document.getElementById('af-g-new').value.trim()||'Autre';
+  }
+  const imdb=parseFloat(document.getElementById('af-imdb').value)||null;
+  const pltRaw=document.getElementById('af-plt').value;
+  const plt=pltRaw?pltRaw.split(',').map(s=>s.trim().toLowerCase().replace(/\s+/g,'')).filter(Boolean):[];
+  const note=document.getElementById('af-note').value.trim();
+  const id='cm_'+Date.now();
+  const entry={id,t,type,genre,y,imdb,plt,custom:true};
+  await saveCustom(entry);
+  if(note) await saveItem(id,{myNote:note});
+  closeAddManual();closeSearch();renderCatalog();
+  showToast(`"${t}" ajouté !`,'ok');
+  tmdbFetch(entry);// background fetch
+}
+
+// ══════════════════════════════════════════════════════
+// 🍞 TOAST + SCROLL NAV
+// ══════════════════════════════════════════════════════
+let _tt;
+function showToast(msg,type=''){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.className='toast show '+(type||'');
+  clearTimeout(_tt); _tt=setTimeout(()=>t.className='toast',2800);
+}
+window.addEventListener('scroll',()=>{
+  document.getElementById('navbar').classList.toggle('solid',window.scrollY>60);
+});
+
+// ══════════════════════════════════════════════════════
+// 🚀 INIT
+// ══════════════════════════════════════════════════════
+async function init(){
+  if(!db){document.getElementById('cfg-warn').style.display='block';}
+  try{
+    await loadProfiles();
+    if(!profiles.length){
+      // Create default profiles if none
+      const defaults=[{name:'Moi',color:'#e50914'},{name:'Ma famille',color:'#7c5cfc'}];
+      for(const p of defaults){
+        let id='local_'+Date.now();
+        if(db){const ref=await db.collection('profiles').add({...p,createdAt:firebase.firestore.FieldValue.serverTimestamp()});id=ref.id;}
+        profiles.push({id,...p});
+      }
+    }
+    renderProfileScreen();
+    // Auto-reconnect last profile
+    const lastId=localStorage.getItem('lastPid');
+    if(lastId){const p=profiles.find(x=>x.id===lastId);if(p){await selectProfile(p);return;}}
+  }catch(e){
+    console.error(e);
+    showToast('Erreur Firebase — vérifiez votre configuration','err');
+    document.getElementById('cfg-warn').style.display='block';
+    // Allow offline use
+    renderProfileScreen();
+  }
+}
+// init() lancé après connexion Firebase Auth
+
+</script>
+</body>
+</html>
