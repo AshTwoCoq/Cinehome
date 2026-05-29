@@ -930,7 +930,8 @@ try {
   if(warn) warn.style.display='none';
 } catch(e) {
   console.error('Erreur Firebase init', e);
-  document.getElementById('cfg-warn').style.display='block';
+  const warn=document.getElementById('cfg-warn');
+  if(warn) warn.style.display='block';
 }
 
 
