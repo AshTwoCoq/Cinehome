@@ -153,6 +153,9 @@ nav.solid{background:var(--bg)}
 .status-btn[data-st="seen"].active,.season-pill.seen{background:var(--seen);color:#000;border-color:var(--seen)}
 .season-pill{min-width:76px;text-align:center}
 .season-pill .season-status{display:block;font-size:9px;line-height:1.1;margin-top:2px;font-weight:700;opacity:.9}
+
+.season-pill.selected{outline:2px solid #fff;outline-offset:2px;box-shadow:0 0 0 3px rgba(255,255,255,.18)}
+
 .card-season{position:absolute;left:7px;top:7px;background:rgba(0,0,0,.75);border-radius:999px;padding:3px 7px;font-size:10px;color:#fff;z-index:5}
 
 
@@ -830,7 +833,7 @@ document.addEventListener('DOMContentLoaded',()=>{
 // ══════════════════════════════════════════════════════
 let profiles=[], currentProfile=null, profileItems={}, customEntries=[];
 let heroItem=null, modalItem=null, currentRating=0, catFilter='all';
-let tmdbResults=[], searchTimer=null, selColor=null;
+let tmdbResults=[], searchTimer=null, selColor=null, selectedSeasonNumber=null;
 
 // ══════════════════════════════════════════════════════
 // 💾 FIREBASE HELPERS
@@ -1114,13 +1117,46 @@ function statusLabel(s){
   return {watchlist:'À regarder',watching:'En cours',seen:'Vu'}[s]||'';
 }
 async function setItemStatus(id,status){
-  const data={status};
-  if(status==='seen') data.seen=true;
-  else data.seen=false;
-  await saveItem(id,data);
+  const item=modalItem && modalItem.id===id ? modalItem : getAllItems().find(x=>x.id===id);
+  const u=profileItems[id]||{};
+
+  // Si une saison est sélectionnée dans une série, le bouton À regarder / En cours / Vu s'applique à cette saison.
+  if(item && item.type==='serie' && selectedSeasonNumber){
+    const total=getSeasonCount(item);
+    const statuses={...(u.seasonStatuses||{})};
+    statuses[String(selectedSeasonNumber)]=status;
+
+    const seasonsSeen=Object.entries(statuses)
+      .filter(([_,v])=>v==='seen')
+      .map(([k])=>Number(k))
+      .sort((a,b)=>a-b);
+
+    const values=Object.values(statuses);
+    let globalStatus='';
+    let seen=false;
+
+    if(total && seasonsSeen.length>=total){
+      globalStatus='seen';
+      seen=true;
+    } else if(values.includes('watching')){
+      globalStatus='watching';
+    } else if(values.includes('watchlist')){
+      globalStatus='watchlist';
+    } else if(seasonsSeen.length>0){
+      globalStatus='watching';
+    } else {
+      globalStatus=status;
+    }
+
+    await saveItem(id,{seasonStatuses:statuses,seasonsSeen,status:globalStatus,seen});
+    selectedSeasonNumber=null;
+  } else {
+    await saveItem(id,{status,seen:status==='seen'});
+  }
+
+  renderStatusControls(item||modalItem);
   renderCatalog();
   updateHeroBtn();
-  if(modalItem&&modalItem.id===id) renderStatusControls(modalItem);
 }
 function getSeasonCount(item,tmdb=null){
   if(item.type!=='serie') return 0;
@@ -1131,6 +1167,12 @@ function formatRuntime(min){
   const h=Math.floor(min/60), m=min%60;
   return h ? `${h}h${m?String(m).padStart(2,'0'):''}` : `${m} min`;
 }
+
+function selectSeasonForStatus(item,seasonNumber){
+  selectedSeasonNumber=seasonNumber;
+  renderStatusControls(item);
+}
+
 async function toggleSeasonSeen(item,seasonNumber,total){
   const u=profileItems[item.id]||{};
   const key=String(seasonNumber);
@@ -1215,10 +1257,10 @@ function renderStatusControls(item,tmdb=null){
     for(let i=1;i<=total;i++){
       const st=statuses[String(i)]||'';
       const b=document.createElement('button');
-      b.className='season-pill '+(st==='seen'?'seen done':st);
+      b.className='season-pill '+(st==='seen'?'seen done':st)+(selectedSeasonNumber===i?' selected':'');
       const small=labelStatus(st) ? `<span class="season-status">${labelStatus(st)}</span>` : '';
       b.innerHTML='Saison '+i+small;
-      b.onclick=()=>toggleSeasonSeen(item,i,total);
+      b.onclick=()=>selectSeasonForStatus(item,i);
       box.appendChild(b);
     }
   } else if(wrap) {
@@ -1843,6 +1885,7 @@ async function addTmdbEntry(idx,opts={}){
 // ══════════════════════════════════════════════════════
 function openModalById(id){const item=allItems().find(i=>i.id===id);if(item) openModal(item);}
 async function openModal(item){
+  selectedSeasonNumber=null;
   modalItem=item;
   const u=profileItems[item.id]||{};
   currentRating=u.myRating||0;
