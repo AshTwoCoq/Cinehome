@@ -926,7 +926,10 @@ try {
   firebase.initializeApp(FIREBASE_CONFIG);
   db = firebase.firestore();
   auth = firebase.auth();
+  const warn=document.getElementById('cfg-warn');
+  if(warn) warn.style.display='none';
 } catch(e) {
+  console.error('Erreur Firebase init', e);
   document.getElementById('cfg-warn').style.display='block';
 }
 
@@ -1215,7 +1218,7 @@ function renderProfileScreen(){
     g.appendChild(a);
   }
 }
-async function selectProfile(p){
+async function baseSelectProfile(p){
   currentProfile=p;
   localStorage.setItem('lastPid',p.id);
   document.getElementById('n-pav').textContent=p.name[0].toUpperCase();
@@ -2355,7 +2358,7 @@ function buildStats(){
         <span style="font-size:.72rem;color:var(--text3)">${new Date(profileItems[i.id].seenAt).toLocaleDateString('fr-FR')}</span>
       </div>`).join('')+'</div>';
   } else {
-    document.getElementById("stats-activity").textContent="Les dates d’ajout seront trackées à partir de maintenant.";
+    document.getElementById('stats-activity').textContent='Les dates d'ajout seront trackées à partir de maintenant.';
   }
 }
 
@@ -2625,9 +2628,8 @@ async function openModal(item){
 }
 
 // Patch selectProfile to load reco count
-const _origSelectProfile=selectProfile;
 async function selectProfile(p){
-  await _origSelectProfile(p);
+  await baseSelectProfile(p);
   initFilterBar();
   await loadRecoCount();
 }
