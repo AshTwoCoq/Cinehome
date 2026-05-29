@@ -6,7 +6,7 @@
 <title>CinéHome</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-:root{--bg:#0f0f0f;--bg2:#141414;--bg3:#1c1c1c;--bg4:#252525;--red:#e50914;--gold:#ff8a00;--green:#3b82f6;--text:#fff;--text2:#b3b3b3;--text3:#555}
+:root{--bg:#0f0f0f;--bg2:#141414;--bg3:#1c1c1c;--bg4:#252525;--red:#e50914;--gold:#ff8a00;--green:#3b82f6;--watch:#8b5cf6;--watching:#3b82f6;--seen:#22c55e;--text:#fff;--text2:#b3b3b3;--text3:#555}
 html{scroll-behavior:smooth}
 body{background:var(--bg);color:var(--text);font-family:'Helvetica Neue',Arial,sans-serif;overflow-x:hidden;min-height:100vh}
 .hidden{display:none!important}
@@ -150,6 +150,16 @@ nav.solid{background:var(--bg)}
 .season-pill.done{background:var(--green);color:#000;border-color:var(--green)}
 .card-season{position:absolute;left:7px;top:7px;background:rgba(0,0,0,.75);border-radius:999px;padding:3px 7px;font-size:10px;color:#fff;z-index:5}
 
+.status-btn[data-st="watchlist"].active,.season-pill.watchlist{background:var(--watch);color:#fff;border-color:var(--watch)}
+.status-btn[data-st="watching"].active,.season-pill.watching{background:var(--watching);color:#fff;border-color:var(--watching)}
+.status-btn[data-st="seen"].active,.season-pill.done,.season-pill.seen{background:var(--seen);color:#000;border-color:var(--seen)}
+.season-pill .season-status{display:block;font-size:9px;line-height:1.1;margin-top:2px;opacity:.9;font-weight:700}
+.season-pill{min-width:74px;text-align:center}
+.season-pill.watchlist .season-status{color:#fff}
+.season-pill.watching .season-status{color:#fff}
+.season-pill.seen .season-status,.season-pill.done .season-status{color:#000}
+
+
 
 /* ── ADD MANUAL MODAL ── */
 #add-ov{position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:400;display:flex;align-items:center;justify-content:center;padding:1rem}
@@ -223,6 +233,7 @@ nav.solid{background:var(--bg)}
   .row-title{padding:0 1rem}
 }
 </style>
+<link rel="icon" href="data:,">
 </head>
 <body>
 
@@ -819,6 +830,12 @@ document.addEventListener('DOMContentLoaded',()=>{
   });
 });
 
+
+async function saveItemState(id,data){
+  if(!db||!currentProfile) return;
+  await db.collection('profiles').doc(currentProfile.id).collection('items').doc(id).set(data,{merge:true});
+}
+
 // ══════════════════════════════════════════════════════
 // 🗺 STATE
 // ══════════════════════════════════════════════════════
@@ -1156,7 +1173,7 @@ function renderStatusControls(item,tmdb=null){
     ['watchlist','À regarder'],
     ['watching','En cours'],
     ['seen','Vu']
-  ].map(([key,label])=>`<button class="status-btn ${current===key?'active':''}" onclick="setItemStatus('${item.id}','${key}')">${label}</button>`).join('');
+  ].map(([key,label])=>`<button class="status-btn ${current===key?\'active\':\'\'}" data-st="${st}" onclick="setItemStatus('${item.id}','${key}')">${label}</button>`).join('');
 
   const total=getSeasonCount(item,tmdb);
   if(item.type==='serie' && total && !item.seasons){
@@ -1797,6 +1814,61 @@ async function addTmdbEntry(idx,opts={}){
 // ══════════════════════════════════════════════════════
 // 🎯 MODAL
 // ══════════════════════════════════════════════════════
+
+function cycleSeasonStatus(item,season){
+  const rec=profileItems[item.id]||{};
+  const key=String(season);
+  const current=(rec.seasonStatuses&&rec.seasonStatuses[key]) || ((rec.seasons||[]).includes(season)?'seen':'');
+  const order=['','watchlist','watching','seen'];
+  const next=order[(order.indexOf(current)+1)%order.length];
+  rec.seasonStatuses=rec.seasonStatuses||{};
+  if(next) rec.seasonStatuses[key]=next;
+  else delete rec.seasonStatuses[key];
+
+  let seen=Object.entries(rec.seasonStatuses)
+    .filter(([_,v])=>v==='seen')
+    .map(([k])=>Number(k))
+    .filter(n=>!Number.isNaN(n));
+
+  rec.seasons=[...new Set(seen)].sort((a,b)=>a-b);
+
+  const vals=Object.values(rec.seasonStatuses);
+  if(vals.includes('watching')) rec.status='watching';
+  else if(vals.includes('watchlist')) rec.status='watchlist';
+  else if(rec.seasons.length && item.seasons && rec.seasons.length>=item.seasons) rec.status='seen';
+  else if(rec.seasons.length) rec.status='watching';
+
+  profileItems[item.id]=rec;
+  saveItemState(item.id,rec);
+  renderSeasonPills(item);
+  renderCatalog();
+  renderHero();
+}
+function seasonLabelStatus(st){
+  if(st==='watchlist') return 'À regarder';
+  if(st==='watching') return 'En cours';
+  if(st==='seen') return 'Vu';
+  return '';
+}
+function renderSeasonPills(item){
+  const wrap=document.getElementById('m-seasons-wrap');
+  const box=document.getElementById('m-seasons');
+  if(!wrap||!box) return;
+  const count=item.seasons||item.number_of_seasons||0;
+  if(item.type!=='serie' || !count){wrap.style.display='none';return;}
+  wrap.style.display='block';
+  const rec=profileItems[item.id]||{};
+  const statuses=rec.seasonStatuses||{};
+  const seenArr=rec.seasons||[];
+  box.innerHTML=`<span class="season-pill" style="cursor:default;opacity:.7">`+count+` saisons au total</span>`;
+  for(let i=1;i<=count;i++){
+    const st=statuses[String(i)] || (seenArr.includes(i)?'seen':'');
+    const cls=st==='seen'?'seen done':st;
+    const txt=seasonLabelStatus(st);
+    box.innerHTML+=`<button class="season-pill ${cls}" onclick="cycleSeasonStatus(modalItem,${i})">Saison ${i}${txt?`<span class="season-status">${txt}</span>`:''}</button>`;
+  }
+}
+
 function openModalById(id){const item=allItems().find(i=>i.id===id);if(item) openModal(item);}
 async function openModal(item){
   modalItem=item;
